@@ -1,8 +1,12 @@
+:toc: auto
+
 # billtitleindex
 Create an index of U.S. bill titles
 
-1. Start with a scraper of Bill Status documents from govinfo (e.g. https://www.govinfo.gov/bulkdata/BILLSTATUS/117/hr/BILLSTATUS-117hr4350.xml), parse the title information:
+1. Get and store Bill Status documents from govinfo (e.g. https://www.govinfo.gov/bulkdata/BILLSTATUS/117/hr/BILLSTATUS-117hr4350.xml). The bill status XML examples and developer guide are here: https://github.com/usgpo/bill-status.
 
+2. Each bill status xml has a `titles` node. This node is a list of bill titles. It has the following form:
++
 ```xml
 <titles>
 <item>
@@ -35,7 +39,48 @@ Create an index of U.S. bill titles
 </item>
 </titles>
 ```
++
+3. For each bill,(e.g. 117hr4350), use the `lxml` Python library to parse title information into a list of dicts. Each item in the list should have the following keys:
+ * title (str, e.g. "CLEAR Act of 2011")
+ * titleNoYear (str, e.g. "CLEAR Act")
+ * type (str)
+ * as (str)
+ * is_for_portion (bool)
 
-2. Index the titles in Elasticsearch, in a document that also includes a) bill number, b) whether the title is for a portion of the bill
 
-3. Use this to construct a search that relates a) bills with the same title b) bills with the same title, but different years
+The parsing should follow the code in the `unitedstates/congress` repository. The goal is to gather only the title metadata, while that repository processes all metadata in the xml. 
+ https://github.com/unitedstates/congress/blob/master/tasks/bill_info.py#L55
+
+```python
+ titles = make_node(root, "titles", None)
+    for title in bill['titles']:
+        n = make_node(titles, "title", title['title'])
+        n.set("type", title['type'])
+        if title['as']:
+            n.set("as", title['as'])
+        if title['is_for_portion']:
+            n.set("partial", "1")
+```
++
+4. Index the deduplicated titles in Elasticsearch, in a document that also includes the bill number and the list of title dicts above. The index can be searched by bill number and by title.
++
+5. Use the ES index to construct a search query in Python. The query will input a bill number (e.g. 117hr4350) and return a) a list of bills with the same title and b) a list of bills with the same titleNoYear. These lists should include the bill number and the matching title.
+
+For example, if the query is for bill number `117hr4350`, the result should be in the following form:
+
+```javascript
+titles: {
+"CLEAR Act of 2011": [--list of bills that have this title--],
+"Clear Law Enforcement for Criminal Alien Removal Act of 2011": [--list of bills that have this title--],
+"To provide for enhanced Federal, State, and local assistance in the enforcement of the immigration laws, to amend the Immigration and Nationality Act, to authorize appropriations to carry out the State Criminal Alien Assistance Program, and for other purposes.": [--list of bills that have this title--]
+},
+titlesNoYear: {
+"CLEAR Act": [],
+"Clear Law Enforcement for Criminal Alien Removal Act": [--list of bills that have this title--],
+"To provide for enhanced Federal, State, and local assistance in the enforcement of the immigration laws, to amend the Immigration and Nationality Act, to authorize appropriations to carry out the State Criminal Alien Assistance Program, and for other purposes.": [--list of bills that have this title--]
+}
+}
+```
+
+
+
