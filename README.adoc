@@ -81,6 +81,8 @@ titlesNoYear: {
 }
 }
 ```
++
+6. Create an API with FastAPI that accepts a bill number and returns the above result. This should extend the API at https://github.com/aih/billtitles-py. PR requests in that Repo can be used to integrate this functionality.
 
 
 
