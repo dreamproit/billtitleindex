@@ -1,0 +1,41 @@
+# billtitleindex
+Create an index of U.S. bill titles
+
+1. Start with a scraper of Bill Status documents from govinfo (e.g. https://www.govinfo.gov/bulkdata/BILLSTATUS/117/hr/BILLSTATUS-117hr4350.xml), parse the title information:
+
+```xml
+<titles>
+<item>
+<titleType>Short Titles as Introduced</titleType>
+<parentTitleType/>
+<title>CLEAR Act of 2011</title>
+<chamberCode/>
+<chamberName/>
+</item>
+<item>
+<titleType>Short Titles as Introduced</titleType>
+<parentTitleType/>
+<title>Clear Law Enforcement for Criminal Alien Removal Act of 2011</title>
+<chamberCode/>
+<chamberName/>
+</item>
+<item>
+<titleType>Official Title as Introduced</titleType>
+<parentTitleType/>
+<title>To provide for enhanced Federal, State, and local assistance in the enforcement of the immigration laws, to amend the Immigration and Nationality Act, to authorize appropriations to carry out the State Criminal Alien Assistance Program, and for other purposes.</title>
+<chamberCode/>
+<chamberName/>
+</item>
+<item>
+<titleType>Display Title</titleType>
+<parentTitleType/>
+<title>CLEAR Act of 2011</title>
+<chamberCode/>
+<chamberName/>
+</item>
+</titles>
+```
+
+2. Index the titles in Elasticsearch, in a document that also includes a) bill number, b) whether the title is for a portion of the bill
+
+3. Use this to construct a search that relates a) bills with the same title b) bills with the same title, but different years
