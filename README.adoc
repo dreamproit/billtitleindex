@@ -82,14 +82,43 @@ titles: {
 "To provide for enhanced Federal, State, and local assistance in the enforcement of the immigration laws, to amend the Immigration and Nationality Act, to authorize appropriations to carry out the State Criminal Alien Assistance Program, and for other purposes.": [--list of bills that have this title--]
 },
 titlesNoYear: {
-"CLEAR Act": [],
+"CLEAR Act": [--list of bills that have this title--],
 "Clear Law Enforcement for Criminal Alien Removal Act": [--list of bills that have this title--],
 "To provide for enhanced Federal, State, and local assistance in the enforcement of the immigration laws, to amend the Immigration and Nationality Act, to authorize appropriations to carry out the State Criminal Alien Assistance Program, and for other purposes.": [--list of bills that have this title--]
-}
 }
 ```
 +
 6. Create an API with FastAPI that accepts a bill number and returns the above result. This should extend the API at https://github.com/aih/billtitles-py. PR requests in that Repo can be used to integrate this functionality.
 
+The API may look like the following:
 
+/bills/titles/116hr2500 ::
+list of titles and titlesNoYear, in the form of the above dict
+
+/bills/titles?bills=['117hr21', '116hr2500'...] ::
+
+{
+117hr21: { titles: ..., titlesNoYear: ...},
+116hr2500: { titles: ..., titlesNoYear: ...}
+}
+
+/titles/[title]?fuzzy=True ::
+list of matching titles and titlesNoYear, in the form of the above dict
+
+
+It may also include a POST, to add new titles to the dataset:
+
+POST /bills/titles/116hr4350
+```
+{
+titles: [
+"CLEAR Act of 2011",
+"Clear Law Enforcement for Criminal Alien Removal Act of 2011",
+"To provide for enhanced Federal, State, and local assistance in the enforcement of the immigration laws, to amend the Immigration and Nationality Act, to authorize appropriations to carry out the State Criminal Alien Assistance Program, and for other purposes."
+titlesNoYear: [
+"CLEAR Act",
+"Clear Law Enforcement for Criminal Alien Removal Act",
+"To provide for enhanced Federal, State, and local assistance in the enforcement of the immigration laws, to amend the Immigration and Nationality Act, to authorize appropriations to carry out the State Criminal Alien Assistance Program, and for other purposes."
+]
+```
 
