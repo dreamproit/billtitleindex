@@ -67,6 +67,9 @@ The parsing should follow the code in the `unitedstates/congress` repository. Th
 ```
 +
 4. Index the deduplicated titles in Elasticsearch, in a document that also includes the bill number and the list of title dicts above. The index can be searched by bill number and by title.
+
+NOTE: if this can be done cleanly in PostgresSQL with the ability to do full text search, that would be preferred.
+
 +
 5. Use the ES index to construct a search query in Python. The query will input a bill number (e.g. 117hr4350) and return a) a list of bills with the same title and b) a list of bills with the same titleNoYear. These lists should include the bill number and the matching title.
 
