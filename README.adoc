@@ -5,6 +5,10 @@ Create an index of U.S. bill titles
 
 1. Get and store Bill Status documents from govinfo (e.g. https://www.govinfo.gov/bulkdata/BILLSTATUS/117/hr/BILLSTATUS-117hr4350.xml). The bill status XML examples and developer guide are here: https://github.com/usgpo/bill-status.
 
+Bulk data for recent bills can be downloaded from the ProPublica bulk downloads page here: https://www.propublica.org/datastore/dataset/congressional-data-bulk-legislation-bills
+
+For example, https://s3.amazonaws.com/pp-projects-static/congress/bills/118.zip?_ga=2.133188941.218487348.1644684899-584653619.1643267056
+
 2. Each bill status xml has a `titles` node. This node is a list of bill titles. It has the following form:
 +
 ```xml
