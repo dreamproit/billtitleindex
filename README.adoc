@@ -8,9 +8,9 @@ Create an index of U.S. bill titles
 Bulk data for recent bills can be downloaded from the ProPublica bulk downloads page here: https://www.propublica.org/datastore/dataset/congressional-data-bulk-legislation-bills
 
 For example, https://s3.amazonaws.com/pp-projects-static/congress/bills/118.zip?_ga=2.133188941.218487348.1644684899-584653619.1643267056
-
-2. Each bill status xml has a `titles` node. This node is a list of bill titles. It has the following form:
 +
+2. Each bill status xml has a `titles` node. This node is a list of bill titles. It has the following form:
+
 ```xml
 <titles>
 <item>
@@ -43,8 +43,8 @@ For example, https://s3.amazonaws.com/pp-projects-static/congress/bills/118.zip?
 </item>
 </titles>
 ```
-+
-3. For each bill,(e.g. 117hr4350), use the `lxml` Python library to parse title information into a list of dicts. Each item in the list should have the following keys:
+
++3. For each bill,(e.g. 117hr4350), use the `lxml` Python library to parse title information into a list of dicts. Each item in the list should have the following keys:
  * title (str, e.g. "CLEAR Act of 2011")
  * titleNoYear (str, e.g. "CLEAR Act")
  * type (str)
@@ -121,4 +121,6 @@ titlesNoYear: [
 "To provide for enhanced Federal, State, and local assistance in the enforcement of the immigration laws, to amend the Immigration and Nationality Act, to authorize appropriations to carry out the State Criminal Alien Assistance Program, and for other purposes."
 ]
 ```
+
+7. Dockerize the scraping and storage of data, and add to a docker-compose with dockerhub.io/arihersh/billtitles (from https://github.com/aih/billtitles-py)
 
