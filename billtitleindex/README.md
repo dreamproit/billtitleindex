@@ -64,3 +64,16 @@ This project collects data from [the official congressional XML data on legislat
     apt-get intall python3.x python3.x-dev
     pip install -r requirements.txt
     ```
+
+### ES-Docker deployment
+
+    ```bash
+    cd <project-root>/es-docker
+    mkdir data1
+    sudo chown -R 1000:1000 ./data1
+    # run es service as a background
+    sudo docker-compose up -d
+
+    # down service
+    sudo docker-compose down
+    ```
