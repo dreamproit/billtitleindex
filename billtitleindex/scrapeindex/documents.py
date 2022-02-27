@@ -9,15 +9,6 @@ class BillBasicDocument(Document):
     """
         ### Bill basic information document
     """
-    stage_titles = fields.NestedField(
-        properties = {
-            'title': fields.TextField(attr='title'),
-            'titleNoYear': fields.TextField(attr='titleNoYear'),
-            'type': fields.TextField(attr='type'),
-            'As': fields.TextField(attr='As'),
-            'is_for_portion': fields.BooleanField(attr='is_for_portion')
-        }
-    )
     class Index:
         name = 'bill-basic'
         settings = {
@@ -58,6 +49,11 @@ class BillTitlesDocument(Document):
         fields = ['official_title', 'popular_title', 'short_title']
         related_models = [BillBasic]
         
+    def get_instances_from_related(self, related_instance):
+        
+        if isinstance(related_instance, BillBasic):
+            return related_instance.billtitles.all()
+        
 
 @registry.register_document
 class BillStageTitleDocument(Document):
@@ -85,4 +81,11 @@ class BillStageTitleDocument(Document):
     class Django:
         model = BillStageTitle
         fields = ['title', 'titleNoYear', 'type', 'As', 'is_for_portion']
+        related_models = [BillBasic]
+        
+    def get_instances_from_related(self, related_instance):
+        
+        if isinstance(related_instance, BillBasic):
+            return related_instance.billstagetitle.all()
+        
         

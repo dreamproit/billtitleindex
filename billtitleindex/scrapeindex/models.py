@@ -18,7 +18,7 @@ class BillBasic(models.Model):
     )
     
     # [bill_type][number]-[congress]
-    bill_id = models.CharField(_("bill_id"), max_length=20)
+    bill_id = models.CharField(verbose_name=_("bill_id"), max_length=20)
     
     # Bill_type can be one of hr, hres, hjres, hconres, s, sres, sjres, sconres. 
     # These are distinct sorts of legislative documents. 
@@ -30,14 +30,14 @@ class BillBasic(models.Model):
     # Neither has the force of law. 
     # Joint resolutions can be used either to propose an amendment to the constitution or to propose a law. 
     # When used to propose a law, they have exactly the same procedural steps as bills.
-    bill_type = models.CharField(_("bill_type"), max_length=10, choices=BILL_TYPE_CHOICES)
+    bill_type = models.CharField(verbose_name=_("bill_type"), max_length=10, choices=BILL_TYPE_CHOICES)
     
     # The bill number is a positive integer. 
     # Bills die at the end of a Congress and numbering starts with 1 at the beginning of each new Congress.
-    number = models.IntegerField(_("number"))
-    congress = models.IntegerField(_("congress"))
-    introduced_at = models.DateField(_("introduction date"), auto_now=False, auto_now_add=False)
-    updated_at = models.DateTimeField(_("updated time"), auto_now=False, auto_now_add=False)
+    number = models.IntegerField(verbose_name=_("number"))
+    congress = models.IntegerField(verbose_name=_("congress"))
+    introduced_at = models.DateField(verbose_name=_("introduction date"), auto_now=False, auto_now_add=False)
+    updated_at = models.DateTimeField(verbose_name=_("updated time"), auto_now=False, auto_now_add=False)
 
 
 class BillTitles(models.Model):
@@ -50,10 +50,10 @@ class BillTitles(models.Model):
         
         Popular titles are assigned by the Library of Congress, and can be added at any time.
     """
-    bill_basic = models.OneToOneField(BillBasic, verbose_name=_("bill basic"), on_delete=models.CASCADE)
-    official_title = models.CharField(_("official title"), max_length=500)
-    popular_title = models.CharField(_("popular title"), max_length=500)
-    short_title = models.CharField(_("short title"), max_length=255)
+    bill_basic = models.OneToOneField(BillBasic, verbose_name=_("bill_basic"), related_name="billtitles", on_delete=models.CASCADE)
+    official_title = models.CharField(verbose_name=_("official_title"), max_length=1000, blank=True, null=True)
+    popular_title = models.CharField(verbose_name=_("popular_title"), max_length=1000, blank=True, null=True)
+    short_title = models.CharField(verbose_name=_("short_title"), max_length=1000, blank=True, null=True)
 
 
 class BillStageTitle(models.Model):
@@ -69,9 +69,9 @@ class BillStageTitle(models.Model):
         ('P', 'popular'),
         ('S', 'short'),
     )
-    bill_basic = models.ForeignKey(BillBasic, verbose_name=_("bill basic"), on_delete=models.CASCADE)
-    title = models.CharField(_("title"), max_length=500)
-    titleNoYear = models.CharField(_("titleNoYear"), max_length=500)
-    type = models.CharField(_("type"), max_length=10, choices=TITLE_TYPE_CHOICES)
-    As = models.CharField(_("as"), max_length=20)
-    is_for_portion = models.BooleanField(_("is_for_portion"))
+    bill_basic = models.ForeignKey(BillBasic, verbose_name=_("bill_basic"), related_name="billstagetitle", on_delete=models.CASCADE)
+    title = models.CharField(verbose_name=_("title"), max_length=1000)
+    titleNoYear = models.CharField(verbose_name=_("titleNoYear"), max_length=1000)
+    type = models.CharField(verbose_name=_("type"), max_length=10, choices=TITLE_TYPE_CHOICES)
+    As = models.CharField(verbose_name=_("as"), max_length=20)
+    is_for_portion = models.BooleanField(verbose_name=_("is_for_portion"))
