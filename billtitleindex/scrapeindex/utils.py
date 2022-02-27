@@ -1,4 +1,5 @@
 import os
+import re
 import json
 import logging
 import ciso8601
@@ -122,6 +123,7 @@ def process_data_json(bill_id, options):
     data_json_fn = bills.output_for_bill(bill_id, 'json')
     source = cu.read(data_json_fn)
     bill_data = json.loads(source)
+    
     bill_basic = BillBasic.create(
         bill_id=bill_id, 
         bill_type=bill_data['bill_type'],
@@ -130,3 +132,46 @@ def process_data_json(bill_id, options):
         introduced_at=datetime.strptime(bill_data['introduced_at'], '%Y-%m-%d').date(),
         updated_at=ciso8601.parse_datetime(bill_data['updated_at'])
     )
+    
+    bill_titles = BillTitles.create(
+        bill_basic=bill_basic,
+        official_title=bill_data['official_title'],
+        popular_title=bill_data['popular_title'],
+        short_title=bill_data['short_title']
+    )
+    
+    no_year_expr = re.compile(' of \d{4}')
+    for title_item in bill_data['titles']:
+        bill_stage_titles = BillStageTitle.create(
+            bill_basic=bill_basic,
+            title=title_item.get('title'),
+            titleNoYear=re.sub(no_year_expr, '', title_item.get('title')),
+            type=title_item.get('type'),
+            As=title_item.get('as'),
+            is_for_portion=title_item.get('is_for_portion')
+        )
+    
+    # Mark this bulk data file as processed by saving its processed lastmod
+    # file under a new path.
+    fdsys_xml_path = bills._path_to_billstatus_file(bill_id)
+    write(
+        # cu.read(os.path.join(os.path.dirname(fdsys_xml_path), "data-fromfdsys-lastmod.txt")),
+        datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        os.path.join(os.path.dirname(fdsys_xml_path), "index.txt")
+    )
+    
+    return {
+        "ok": True,
+        "saved": True
+    }
+    
+
+def write(content, destination):
+    # save the content to disk.
+    cu.mkdir_p(os.path.dirname(destination))
+    f = open(destination, 'wb')
+    try:
+        f.write(content.encode('utf-8'))
+    except:
+        f.write(content)
+    f.close()
