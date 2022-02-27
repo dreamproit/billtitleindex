@@ -35,6 +35,8 @@ class BillBasic(models.Model):
     # The bill number is a positive integer. 
     # Bills die at the end of a Congress and numbering starts with 1 at the beginning of each new Congress.
     number = models.IntegerField(verbose_name=_("number"))
+    # [congress][bill_type][number]
+    bill_number = models.CharField(verbose_name=_("bill_number"), max_length=20)
     congress = models.IntegerField(verbose_name=_("congress"))
     introduced_at = models.DateField(verbose_name=_("introduction date"), auto_now=False, auto_now_add=False)
     updated_at = models.DateTimeField(verbose_name=_("updated time"), auto_now=False, auto_now_add=False)

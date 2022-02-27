@@ -18,7 +18,7 @@ class BillBasicDocument(Document):
         
     class Django:
         model = BillBasic
-        fields = ['bill_id', 'bill_type', 'number', 'congress', 'introduced_at', 'updated_at']
+        fields = ['bill_id', 'bill_type', 'number', 'bill_number', 'congress', 'introduced_at', 'updated_at']
 
 
 @registry.register_document
@@ -31,6 +31,7 @@ class BillTitlesDocument(Document):
             'bill_id': fields.TextField(attr='bill_id'),
             'bill_type': fields.TextField(attr='bill_type'),
             'number': fields.IntegerField(attr='number'),
+            'bill_number': fields.TextField(attr='bill_number'),
             'congress': fields.IntegerField(attr='congress'),
             'introduced_at': fields.DateField(attr='introduced_at'),
             'updated_at': fields.DateField(attr='updated_at')
@@ -65,6 +66,7 @@ class BillStageTitleDocument(Document):
             'bill_id': fields.TextField(attr='bill_id'),
             'bill_type': fields.TextField(attr='bill_type'),
             'number': fields.IntegerField(attr='number'),
+            'bill_number': fields.TextField(attr='bill_number'),
             'congress': fields.IntegerField(attr='congress'),
             'introduced_at': fields.DateField(attr='introduced_at'),
             'updated_at': fields.DateField(attr='updated_at')
