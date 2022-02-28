@@ -169,11 +169,9 @@ def process_data_json(bill_id, options):
     
     # Mark this bulk data file as processed by saving its processed lastmod
     # file under a new path.
-    fdsys_xml_path = bills._path_to_billstatus_file(bill_id)
     write(
-        # cu.read(os.path.join(os.path.dirname(fdsys_xml_path), "data-fromfdsys-lastmod.txt")),
         datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-        os.path.join(os.path.dirname(fdsys_xml_path), "index.txt")
+        os.path.join(os.path.dirname(data_json_fn), "index.txt")
     )
     print("[%s] Parsing/Index END." % bill_id)
     
