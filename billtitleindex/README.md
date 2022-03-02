@@ -77,3 +77,9 @@ This project collects data from [the official congressional XML data on legislat
     # down service
     sudo docker-compose down
     ```
+
+### PostgreSQL deployment
+
+### Setup Environment Variables
+
+### Run pipeline

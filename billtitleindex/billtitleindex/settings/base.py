@@ -28,7 +28,7 @@ INSTALLED_APPS = [
     # es dsl
     'django_elasticsearch_dsl',
     # custom app
-    'scrapeindex',
+    'btiapp',
 ]
 
 ELASTICSEARCH_DSL={
