@@ -1,4 +1,5 @@
 import os
+import sys
 import re
 import json
 import logging
@@ -31,8 +32,12 @@ def get_data_path(*args):
     args = list(args)
     if len(args) > 0:
         args.insert(1, "bills")
-    data_dir = config('DATA_DIR')
-    return os.path.join(data_dir, *args)
+    if config('DATA_DIR'):
+        data_dir = config('DATA_DIR')
+        return os.path.join(data_dir, *args)
+    else:
+        logging.error('Can not find data directory. You need to configure "DATA_DIR" in env file.')
+        sys.exit(1)
     
 def filter_ints(seq):
     for s in seq:
