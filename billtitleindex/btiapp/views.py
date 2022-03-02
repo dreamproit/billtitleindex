@@ -5,8 +5,11 @@ app = FastAPI()
 
 
 @app.get("/bill/titles")
+def get_bill_titles_by_bills(bills: List[str]):
+    pass
+
 @app.get("/bills/titles/{billnumber}")
-def get_bill_titles_by_billnumber(bills: List[str]):
+def get_bill_titles_by_bill():
     pass
 
 @app.get("/titles/{title}")
