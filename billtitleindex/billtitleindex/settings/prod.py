@@ -7,3 +7,14 @@ SECRET_KEY = config('PROD_SECRET_KEY')
 DEBUG = False
 
 ALLOWED_HOSTS = ['*']
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'billtitle',
+        'USER': config('PROD_DB_USER'),
+        'PASSWORD': config('PROD_DB_PWD'),
+        'HOST': 'localhost',
+        'PORT': '5432',
+    }
+}
