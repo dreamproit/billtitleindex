@@ -67,19 +67,63 @@ This project collects data from [the official congressional XML data on legislat
 
 ### ES-Docker deployment
 
-    ```bash
-    cd <project-root>/es-docker
-    mkdir data1
-    sudo chown -R 1000:1000 ./data1
-    # run es service as a background
-    sudo docker-compose up -d
+```bash
+cd <project-root>/es-docker
+mkdir data1
+sudo chown -R 1000:1000 ./data1
+# run es service as a background
+sudo docker-compose up -d
 
-    # down service
-    sudo docker-compose down
-    ```
+# down service
+sudo docker-compose down
+```
 
 ### PostgreSQL deployment
 
+Deploy PostgreSQL instance as a docker container. After that, setup project user in DB.
+```postgresql
+postgres=# create user btiadmin with encrypted password 'btiadmin';
+CREATE ROLE
+postgres=# grant all on database billtitle to btiadmin;
+GRANT
+```
+
 ### Setup Environment Variables
 
+Setup system environment variable
+```bash
+sudo nano ~/.bashrc
+```
+
+Add following line in `.bashrc` file depending on Dev or Prod server
+```edit
+export ENVIRONMENT=DEV
+```
+
+After that:
+```bash
+source ~/.bashrc
+sudo systemctl daemon-reload
+```
+Edit `<project>/billtitleindex/billtitleindex/settings/.env`. Configure project secretkey, DB username and password.
+
 ### Run pipeline
+
+To store bill data and index them, run pipeline with following command.    
+
+```bash
+source <project virtualenv>/env/bin/activate
+cd <project_dir>/billtitleindex
+python manage.py runpipeline
+```
+
+## FastAPI run
+
+### Run API
+
+```bash
+uvicorn billtitleindex.wsgi:app --reload
+```
+### Sample response
+
+We can use `request.rest` to check the sample response of API endpoints
