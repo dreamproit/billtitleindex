@@ -1,5 +1,6 @@
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
+from sqlalchemy import null
 
     
 class BillBasic(models.Model):
@@ -74,6 +75,6 @@ class BillStageTitle(models.Model):
     bill_basic = models.ForeignKey(BillBasic, verbose_name=_("bill_basic"), related_name="billstagetitle", on_delete=models.CASCADE)
     title = models.CharField(verbose_name=_("title"), max_length=2000)
     titleNoYear = models.CharField(verbose_name=_("titleNoYear"), max_length=2000)
-    type = models.CharField(verbose_name=_("type"), max_length=10, choices=TITLE_TYPE_CHOICES)
+    type = models.CharField(verbose_name=_("type"), max_length=10, choices=TITLE_TYPE_CHOICES, blank=True, null=True)
     As = models.CharField(verbose_name=_("as"), max_length=50, blank=True, null=True)
-    is_for_portion = models.BooleanField(verbose_name=_("is_for_portion"))
+    is_for_portion = models.BooleanField(verbose_name=_("is_for_portion"), blank=True, null=True)
