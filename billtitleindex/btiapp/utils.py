@@ -7,7 +7,6 @@ import ciso8601
 from decouple import config
 from datetime import datetime
 from congress.tasks import utils as cu
-from congress.tasks import bills
 from btiapp.models import BillBasic, BillTitles, BillStageTitle
 
 def get_config():
@@ -132,6 +131,12 @@ def read(destination):
     if os.path.exists(destination):
         with open(destination) as f:
             return f.read()
+
+
+def get_titleNoYear(title):
+    no_year_expr = re.compile(' of \d{4}')
+    return re.sub(no_year_expr, '', title)
+    
         
 def process_data_json(bill_id, options):
     # Load an existing bill status JSON file.
@@ -139,12 +144,17 @@ def process_data_json(bill_id, options):
     data_json_fn = get_bill_data_path(bill_id)
     source = read(data_json_fn)
     bill_data = json.loads(source)
-    
+
+    bill_type = bill_data['bill_type']
+    number = int(bill_data['number'])
+    congress = int(bill_data['congress'])
+    bill_number = f'{congress}{bill_type}{number}'
     bill_basic = BillBasic.objects.create(
         bill_id=bill_id, 
-        bill_type=bill_data['bill_type'],
-        number=int(bill_data['number']),
-        congress=int(bill_data['congress']),
+        bill_type=bill_type,
+        number=number,
+        bill_number=bill_number,
+        congress=congress,
         introduced_at=datetime.strptime(bill_data['introduced_at'], '%Y-%m-%d').date(),
         updated_at=ciso8601.parse_datetime(bill_data['updated_at'])
     ) if not BillBasic.objects.filter(bill_id=bill_id).exists() else BillBasic.objects.filter(bill_id=bill_id).first()
@@ -159,13 +169,12 @@ def process_data_json(bill_id, options):
         )
     print("[%s] Bill Titles information saved..." % bill_id)
     
-    no_year_expr = re.compile(' of \d{4}')
     for title_item in bill_data['titles']:
         if not BillStageTitle.objects.filter(bill_basic__id = bill_basic.pk, title=title_item.get('title')).exists():
             BillStageTitle.objects.get_or_create(
                 bill_basic=bill_basic,
                 title=title_item.get('title'),
-                titleNoYear=re.sub(no_year_expr, '', title_item.get('title')),
+                titleNoYear=get_titleNoYear(title_item.get('title')),
                 type=title_item.get('type'),
                 As=title_item.get('as'),
                 is_for_portion=title_item.get('is_for_portion')
