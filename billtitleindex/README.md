@@ -1,7 +1,7 @@
-BillTitleIndex Solution
+BillTitleIndex
 =======================
 
-## How to update recent BillStatus XML Files:
+## Update recent BillStatus XML Files:
 
 Bill data is primarily collected by using [unitedstates/congress](https://github.com/acxz/congress/tree/python-package), which covers 2013 to the present.
 
@@ -109,7 +109,7 @@ Edit `<project>/billtitleindex/billtitleindex/settings/.env`. Configure project 
 
 ### Run pipeline
 
-To store bill data and index them, run pipeline with following command.    
+To store and index bill data, run pipeline with following command.    
 
 ```bash
 source <project virtualenv>/env/bin/activate
