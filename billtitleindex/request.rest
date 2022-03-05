@@ -1,0 +1,22 @@
+### Example API Requests for Testing
+
+###
+GET http://localhost:8000/api/bills/titles/116hr2500
+
+### Case: Quotation Mark-Ditto mark
+GET http://localhost:8000/api/bills/titles?bills=["117hr21","116hr2500"]
+
+### Case: Quotation Mark-Apostrophe
+GET http://localhost:8000/api/bills/titles?bills=['117hr21','116hr2500']
+
+### Case: Has no Quotation Mark
+GET http://localhost:8000/api/bills/titles?bills=[117hr21,116hr2500]
+
+### Case: Has space
+GET http://localhost:8000/api/bills/titles?bills=[117hr21, 116hr2500]
+
+### Case: Only one value with bracket
+GET http://localhost:8000/api/bills/titles?bills=[117hr21]
+
+### Case: Only one value without bracket
+GET http://localhost:8000/api/bills/titles?bills=117hr21
