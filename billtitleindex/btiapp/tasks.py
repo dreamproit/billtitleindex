@@ -5,14 +5,8 @@ from celery import Celery
 from celery import app, shared_task
 
 
-# job model
-from .models import BillStageTitle
-
-# scraping
-import requests
-import json
-from datetime import datetime
-import lxml
+from django.core.management import call_command
+import subprocess     
 
 # logging
 from celery.utils.log import get_task_logger
@@ -20,13 +14,20 @@ from celery.utils.log import get_task_logger
 logger = get_task_logger(__name__)
 
 
-# save function
-@shared_task()
-def run_pipeline():
-    return
-
 # scraping function
 @shared_task
 def scrape_bills():
-    return
+    scraping_process = subprocess.Popen(['usc-run', 'govinfo', '--bulkdata=BILLSTATUS'])
+    if not scraping_process.poll() is None:
+        # process has finished
+        converting_process = subprocess.Popen(['usc-run', 'bills'])
+        
+
+# pipeline function
+@shared_task()
+def run_pipeline():
+    call_command('runpipeline', verbosity=3, interactive=False)
+    
+        
+    
 
