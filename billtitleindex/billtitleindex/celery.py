@@ -14,6 +14,12 @@ app.config_from_object("django.conf:settings", namespace="CELERY")
 app.autodiscover_tasks()
 
 app.conf.beat_schedule = {
-    'task': '',
-    'schedule': crontab()
+    'scraping-task-midnight-daily': {
+        'task': 'tasks.scrape_bills',
+        'schedule': crontab(hour=0, minute=0)
+    },
+    'pipeline-task-everyday-4am': {
+        'task': 'tasks.run_pipeline',
+        'schedule': crontab(hour=4, minute=0)
+    }
 }
