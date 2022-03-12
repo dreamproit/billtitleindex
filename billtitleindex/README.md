@@ -124,6 +124,43 @@ python manage.py runpipeline
 ```bash
 uvicorn billtitleindex.wsgi:app --reload
 ```
+
 ### Sample response
 
 We can use `request.rest` to check the sample response of API endpoints
+
+## Scheduling Task
+
+### Setup RabbitMQ
+
+```bash
+# Install Erlang/OTP
+## Import Erlang GPG Key
+$ sudo apt update
+
+$ sudo apt install software-properties-common apt-transport-https
+
+$ wget -O- https://packages.erlang-solutions.com/ubuntu/erlang_solutions.asc | sudo apt-key add -
+
+## Add Erlang Repository to Ubuntu
+### ubuntu 22.04/20.04
+$ echo "deb https://packages.erlang-solutions.com/ubuntu focal contrib" | sudo tee /etc/apt/sources.list.d/erlang.list
+
+### ubuntu 18.04
+$ echo "deb https://packages.erlang-solutions.com/ubuntu bionic contrib" | sudo tee /etc/apt/sources.list.d/erlang.list
+
+## Install Erlang
+$ sudo apt update
+
+$ sudo apt install erlang
+
+$ sudo apt install curl wget gpg gnupg2 -y
+
+$ curl -s https://packagecloud.io/install/repositories/rabbitmq/rabbitmq-server/script.deb.sh | sudo bash
+
+$ sudo apt update -y
+
+$ sudo apt install rabbitmq-server -y
+
+$ systemctl status rabbitmq-server.service
+```
