@@ -1,20 +1,20 @@
 from decouple import config
 from .base import *
+import os
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = config('PROD_SECRET_KEY')
 
-# SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['app']
 
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'billtitle',
-        'USER': config('PROD_DB_USER'),
-        'PASSWORD': config('PROD_DB_PWD'),
-        'HOST': 'localhost',
+        'NAME': os.environ.get('POSTGRES_DB'),
+        'USER': os.environ.get('POSTGRES_USER'),
+        'PASSWORD': os.environ.get('POSTGRES_PASSWORD'),
+        'HOST': 'postgres',
         'PORT': '5432',
     }
 }

@@ -1,0 +1,140 @@
+version: '3.4'
+
+services:
+
+  # PostgreSQL
+  postgres:
+    container_name: postgres
+    hostname: postgres
+    image: postgres:latest
+    environment:
+      - POSTGRES_USER=btiadmin
+      - POSTGRES_PASSWORD=btiadmin
+      - POSTGRES_DB=billtitle
+    ports:
+      - "5432:5432"
+    networks:
+      - main
+    volumes:
+      - postgresql-data:/var/lib/postgresql/data
+    restart: on-failure
+
+  # Elasticsearch
+  elasticsearch:
+    container_name: elasticsearch
+    hostname: elasticsearch
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.16.2
+    environment:
+      - node.name=es01
+      - cluster.name=es-docker-cluster
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    networks:
+      - main
+    volumes:
+      - ./elasticsearch/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
+      - ./data1:/var/log/data    
+    restart: on-failure
+
+  # RabbitMQ
+  rabbitmq:
+    container_name: rabbitmq
+    hostname: rabbitmq
+    image: rabbitmq:latest
+    ports:
+      - "5672:5672"
+    networks:
+      - main
+    restart: on-failure
+
+  # Pipeline APP
+  app:
+    build: .
+    container_name: app
+    hostname: app
+    image: app-image
+    depends_on:
+      - postgres
+      - elasticsearch
+      - rabbitmq
+    environment:
+      - DJANGO_SETTINGS_MODULE=billtitleindex.settings.prod
+      - POSTGRES_USER=btiadmin
+      - POSTGRES_PASSWORD=btiadmin
+      - POSTGRES_DB=billtitle
+    command: sh -c "wait-for postgres:5432"
+    command: sh -c "wait-for elasticsearch:9200"
+    command: sh -c "wait-for rabbitmq:5672"
+    command: sh -c "python manage.py makemigrations && python manage.py migrate && python manage.py runserver 0.0.0.0:8080"
+    expose:
+      - "8080"
+    networks:
+      - main
+    volumes:
+      - .:/app
+    restart: on-failure
+
+  # FastAPI
+  api:
+    hostname: api
+    image: app-image
+    command: sh -c "wait-for postgres:5432"
+    command: sh -c "wait-for elasticsearch:9200"
+    command: sh -c "uvicorn billtitleindex.wsgi:app --reload"
+    expose:
+      - "8000"
+    depends_on:
+      - postgres
+      - elasticsearch
+    networks:
+      - main
+    restart: on-failure
+
+  # celery worker
+  celery_worker:
+    hostname: celery_worker
+    image: app-image
+    command: sh -c "wait-for rabbitmq:5672"
+    command: sh -c "wait-for app:8080"
+    command: sh -c "celery -A billtitleindex worker -l info"
+    depends_on:
+      - app
+      - postgres
+      - rabbitmq
+    deploy:
+      replicas: 2
+      restart_policy:
+        condition: on-failure
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 50M
+        reservations:
+          cpus: '0.25'
+          memory: 20M
+    networks:
+      - main
+    restart: on-failure
+
+  # celery beat
+  celery_beat:
+    hostname: celery_beat
+    image: app-image
+    command: sh -c "wait-for rabbitmq:5672"
+    command: sh -c "wait-for app:8080"
+    command: sh -c "celery -A billtitleindex beat -l info"
+    depends_on:
+      - app
+      - postgres
+      - rabbitmq
+    networks:
+      - main
+    restart: on-failure
+
+networks:
+  main:
+
+volumes:
+  postgresql-data:
