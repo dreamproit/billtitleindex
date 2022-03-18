@@ -2,11 +2,12 @@ import os
 import sys
 import re
 import json
+import errno
 import logging
+import traceback
 import ciso8601
 from decouple import config
 from datetime import datetime
-from congress.tasks import utils as cu
 from btiapp.models import BillBasic, BillTitles, BillStageTitle
 
 def get_config():
@@ -46,6 +47,9 @@ def filter_ints(seq):
             # Not an integer
             continue
         
+def format_exception(exception):
+    exc_type, exc_value, exc_traceback = sys.exc_info()
+    return "\n".join(traceback.format_exception(exc_type, exc_value, exc_traceback))
 
 def get_json_bills_to_process(options):
     if not options.get('congress'):
@@ -78,7 +82,6 @@ def get_json_bills_to_process(options):
                     bill_id = f"{bill_type_and_number}-{congress}"
                     yield bill_id
 
-
 def process_set(to_fetch, options):
     errors = []
     saved = []
@@ -91,7 +94,7 @@ def process_set(to_fetch, options):
             if options.get('raise', False):
                 raise
             else:
-                errors.append((id, e, cu.format_exception(e)))
+                errors.append((id, e, format_exception(e)))
                 continue
             
         if results.get('ok', False):
@@ -115,7 +118,7 @@ def process_set(to_fetch, options):
             else:
                 message += "[%s] %s" % (id, error)
                 
-        cu.admin(message)   # email if possible
+        logging.info(message)
         
     logging.warning("\nErrors for %s." % len(errors))
     logging.warning("Skipped %s." % len(skips))
@@ -123,8 +126,11 @@ def process_set(to_fetch, options):
     
     return saved + skips    # all of the OK's
 
+def split_bill_id(bill_id):
+    return re.match("^([a-z]+)(\d+)-(\d+)$", bill_id).groups()
+
 def get_bill_data_path(bill_id):
-    bill_type, number, congress = cu.split_bill_id(bill_id)
+    bill_type, number, congress = split_bill_id(bill_id)
     return "%s/%s/bills/%s/%s%s/%s" % (config('DATA_DIR'), congress, bill_type, bill_type, number, "data.json")
 
 def read(destination):
@@ -132,12 +138,10 @@ def read(destination):
         with open(destination) as f:
             return f.read()
 
-
 def get_titleNoYear(title):
     no_year_expr = re.compile(' of \d{4}')
     return re.sub(no_year_expr, '', title)
     
-        
 def process_data_json(bill_id, options):
     # Load an existing bill status JSON file.
     print("[%s] Processing..." % bill_id)
@@ -194,10 +198,18 @@ def process_data_json(bill_id, options):
         "saved": True
     }
     
+def mkdir_p(path):
+    try:
+        os.makedirs(path)
+    except OSError as exc:  # Python >2.5
+        if exc.errno == errno.EEXIST:
+            pass
+        else:
+            raise
 
 def write(content, destination):
     # save the content to disk.
-    cu.mkdir_p(os.path.dirname(destination))
+    mkdir_p(os.path.dirname(destination))
     f = open(destination, 'wb')
     try:
         f.write(content.encode('utf-8'))
