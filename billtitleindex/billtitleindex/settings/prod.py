@@ -6,7 +6,7 @@ SECRET_KEY = config('PROD_SECRET_KEY')
 
 DEBUG = False
 
-ALLOWED_HOSTS = ['app']
+ALLOWED_HOSTS = ['*']
 
 DATABASES = {
     'default': {
@@ -17,6 +17,12 @@ DATABASES = {
         'HOST': 'postgres',
         'PORT': '5432',
     }
+}
+
+ELASTICSEARCH_DSL={
+    'default': {
+        'hosts': 'es01:9200'
+    },
 }
 
 # celery settings

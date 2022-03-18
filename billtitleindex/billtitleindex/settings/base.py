@@ -31,11 +31,6 @@ INSTALLED_APPS = [
     'btiapp',
 ]
 
-ELASTICSEARCH_DSL={
-    'default': {
-        'hosts': 'localhost:9200'
-    },
-}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

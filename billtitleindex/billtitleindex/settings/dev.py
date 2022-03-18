@@ -25,6 +25,12 @@ DATABASES = {
     }
 }
 
+ELASTICSEARCH_DSL={
+    'default': {
+        'hosts': 'localhost:9200'
+    },
+}
+
 # celery settings
 CELERY_BROKER_URL = 'amqp://localhost:5672'
 CELERY_RESULT_BACKEND = 'amqp://localhost:5672'
