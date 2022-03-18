@@ -164,3 +164,9 @@ $ sudo apt install rabbitmq-server -y
 
 $ systemctl status rabbitmq-server.service
 ```
+
+### Deploy solution
+
+```bash
+docker-compose up -d
+```
