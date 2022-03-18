@@ -19,7 +19,7 @@ CMD ["chmod", "+x", "/bin/wait-for"]
 
 # Install pip requirements
 RUN python -m pip install --upgrade pip
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install -r requirements.txt
 
 # EXPOSE 8080
 
