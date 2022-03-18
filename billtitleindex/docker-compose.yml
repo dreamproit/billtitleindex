@@ -20,9 +20,9 @@ services:
     restart: on-failure
 
   # Elasticsearch
-  elasticsearch:
-    container_name: elasticsearch
-    hostname: elasticsearch
+  es01:
+    container_name: es01
+    hostname: es01
     image: docker.elastic.co/elasticsearch/elasticsearch:7.16.2
     environment:
       - node.name=es01
@@ -57,19 +57,20 @@ services:
     image: app-image
     depends_on:
       - postgres
-      - elasticsearch
+      - es01
       - rabbitmq
     environment:
-      - DJANGO_SETTINGS_MODULE=billtitleindex.settings.prod
+      - ENVIRONMENT=PROD
+      # - DJANGO_SETTINGS_MODULE=billtitleindex.settings.prod
       - POSTGRES_USER=btiadmin
       - POSTGRES_PASSWORD=btiadmin
       - POSTGRES_DB=billtitle
     command: sh -c "wait-for postgres:5432"
-    command: sh -c "wait-for elasticsearch:9200"
+    command: sh -c "wait-for es01:9200"
     command: sh -c "wait-for rabbitmq:5672"
     command: sh -c "python manage.py makemigrations && python manage.py migrate && python manage.py runserver 0.0.0.0:8080"
-    expose:
-      - "8080"
+    ports:
+      - "8080:8080"
     networks:
       - main
     volumes:
@@ -81,57 +82,59 @@ services:
     hostname: api
     image: app-image
     command: sh -c "wait-for postgres:5432"
-    command: sh -c "wait-for elasticsearch:9200"
-    command: sh -c "uvicorn billtitleindex.wsgi:app --reload"
-    expose:
-      - "8000"
+    command: sh -c "wait-for es01:9200"
+    command: sh -c "uvicorn billtitleindex.wsgi:app --host 0.0.0.0 --port 8000"
+    environment:
+      - ENVIRONMENT=PROD
+    ports:
+      - "8000:8000"
     depends_on:
       - postgres
-      - elasticsearch
+      - es01
     networks:
       - main
     restart: on-failure
 
   # celery worker
-  celery_worker:
-    hostname: celery_worker
-    image: app-image
-    command: sh -c "wait-for rabbitmq:5672"
-    command: sh -c "wait-for app:8080"
-    command: sh -c "celery -A billtitleindex worker -l info"
-    depends_on:
-      - app
-      - postgres
-      - rabbitmq
-    deploy:
-      replicas: 2
-      restart_policy:
-        condition: on-failure
-      resources:
-        limits:
-          cpus: '0.50'
-          memory: 50M
-        reservations:
-          cpus: '0.25'
-          memory: 20M
-    networks:
-      - main
-    restart: on-failure
+  # celery_worker:
+  #   hostname: celery_worker
+  #   image: app-image
+  #   command: sh -c "wait-for rabbitmq:5672"
+  #   command: sh -c "wait-for app:8080"
+  #   command: sh -c "celery -A billtitleindex worker -l info"
+  #   depends_on:
+  #     - app
+  #     - postgres
+  #     - rabbitmq
+  #   deploy:
+  #     replicas: 2
+  #     restart_policy:
+  #       condition: on-failure
+  #     resources:
+  #       limits:
+  #         cpus: '0.50'
+  #         memory: 50M
+  #       reservations:
+  #         cpus: '0.25'
+  #         memory: 20M
+  #   networks:
+  #     - main
+  #   restart: on-failure
 
   # celery beat
-  celery_beat:
-    hostname: celery_beat
-    image: app-image
-    command: sh -c "wait-for rabbitmq:5672"
-    command: sh -c "wait-for app:8080"
-    command: sh -c "celery -A billtitleindex beat -l info"
-    depends_on:
-      - app
-      - postgres
-      - rabbitmq
-    networks:
-      - main
-    restart: on-failure
+  # celery_beat:
+  #   hostname: celery_beat
+  #   image: app-image
+  #   command: sh -c "wait-for rabbitmq:5672"
+  #   command: sh -c "wait-for app:8080"
+  #   command: sh -c "celery -A billtitleindex beat -l info"
+  #   depends_on:
+  #     - app
+  #     - postgres
+  #     - rabbitmq
+  #   networks:
+  #     - main
+  #   restart: on-failure
 
 networks:
   main:
