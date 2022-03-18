@@ -15,7 +15,9 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-
+from btiapp import views
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('scraping/', views.scrape),
+    path('pipeline/', views.run_pipeline),
 ]
