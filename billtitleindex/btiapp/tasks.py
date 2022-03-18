@@ -12,7 +12,8 @@ logger = get_task_logger(__name__)
 # scraping function
 @shared_task
 def scrape_bills():
-    working_directory = ''
+    print("start scraping...")
+    working_directory = '/app'
     scraping_process = subprocess.Popen(['usc-run', 'govinfo', '--bulkdata=BILLSTATUS'], cwd=working_directory)
     if not scraping_process.poll() is None:
         # process has finished
@@ -22,7 +23,7 @@ def scrape_bills():
 # pipeline function
 @shared_task()
 def run_pipeline():
-    call_command('runpipeline', verbosity=3, interactive=False)
+    call_command('runpipeline', verbosity=3)
     
         
     
