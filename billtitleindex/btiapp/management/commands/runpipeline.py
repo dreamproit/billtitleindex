@@ -13,6 +13,7 @@ class Command(BaseCommand):
     
     def handle(self, *args, **options):
         # configure logging
+        print("start run pipeline...")
         if options.get('debug', False):
             log_level = "debug"
         else:
