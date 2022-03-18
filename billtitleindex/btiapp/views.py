@@ -1,14 +1,16 @@
-from optparse import Option
-from typing import Tuple, Dict, List, Optional
+
+from typing import List, Optional
 from fastapi import FastAPI, Depends, Query
-from fastapi.responses import JSONResponse
+from django.http import JsonResponse
 from elasticsearch_dsl import Q
+import subprocess
 
 from btiapp import utils
 from btiapp.models import BillBasic, BillStageTitle
 from btiapp.documents import BillStageTitleDocument
 from btiapp.schemas import BillMatchingTitlesResponse, BillTitlesResponse, BillsTitlesResponse
-
+from btiapp.tasks import scrape_bills
+from django.core.management import call_command
 
 app = FastAPI()
 
@@ -189,4 +191,21 @@ def add_new_title_to_bill(billnumber: str, title: str):
     else:
         return JSONResponse({'Error': f'Can not find bill depending on this {billnumber}'}, status_code=404)
     
+
+def scrape(request):
+    if request.method == 'GET':
+        print('scraping....')
+        working_directory = '/app'
+        scraping_process = subprocess.Popen(['usc-run', 'govinfo', '--bulkdata=BILLSTATUS'], cwd=working_directory)
+        if not scraping_process.poll() is None:
+            # process has finished
+            converting_process = subprocess.Popen(['usc-run', 'bills'])
+        return JsonResponse({'result': 'success'}, status=200)
+
+    
+def run_pipeline(request):
+    if request.method == "GET":
+        print('runpipeline....')
+        call_command('runpipeline', verbosity=3)
+        return JsonResponse({'result': 'success'}, status=200)
     
