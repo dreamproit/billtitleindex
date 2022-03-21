@@ -1,126 +1,196 @@
-:toc: auto
+:toc:
 
-# billtitleindex
-Create an index of U.S. bill titles
+# BillTitleIndex 
 
-1. Get and store Bill Status documents from govinfo (e.g. https://www.govinfo.gov/bulkdata/BILLSTATUS/117/hr/BILLSTATUS-117hr4350.xml). The bill status XML examples and developer guide are here: https://github.com/usgpo/bill-status.
+## Overview
 
-Bulk data for recent bills can be downloaded from the ProPublica bulk downloads page here: https://www.propublica.org/datastore/dataset/congressional-data-bulk-legislation-bills
+TODO: describe the components of the pipeline, how they work, and how it fits in to the BillMap project. 
 
-For example, https://s3.amazonaws.com/pp-projects-static/congress/bills/118.zip?_ga=2.133188941.218487348.1644684899-584653619.1643267056
-+
-2. Each bill status xml has a `titles` node. This node is a list of bill titles. It has the following form:
+## Usage 
 
-```xml
-<titles>
-<item>
-<titleType>Short Titles as Introduced</titleType>
-<parentTitleType/>
-<title>CLEAR Act of 2011</title>
-<chamberCode/>
-<chamberName/>
-</item>
-<item>
-<titleType>Short Titles as Introduced</titleType>
-<parentTitleType/>
-<title>Clear Law Enforcement for Criminal Alien Removal Act of 2011</title>
-<chamberCode/>
-<chamberName/>
-</item>
-<item>
-<titleType>Official Title as Introduced</titleType>
-<parentTitleType/>
-<title>To provide for enhanced Federal, State, and local assistance in the enforcement of the immigration laws, to amend the Immigration and Nationality Act, to authorize appropriations to carry out the State Criminal Alien Assistance Program, and for other purposes.</title>
-<chamberCode/>
-<chamberName/>
-</item>
-<item>
-<titleType>Display Title</titleType>
-<parentTitleType/>
-<title>CLEAR Act of 2011</title>
-<chamberCode/>
-<chamberName/>
-</item>
-</titles>
+TODO: Describe how to use the API and what responses to expect. 
+
+## Deployment
+
+```bash
+docker-compose up -d
 ```
 
-+3. For each bill,(e.g. 117hr4350), use the `lxml` Python library to parse title information into a list of dicts. Each item in the list should have the following keys:
- * title (str, e.g. "CLEAR Act of 2011")
- * titleNoYear (str, e.g. "CLEAR Act")
- * type (str)
- * as (str)
- * is_for_portion (bool)
+This will start the docker containers, including both the scrapers for bill metadata, indexing of the titles, and the FastAPI server.
 
+### Tasks
 
-The parsing should follow the code in the `unitedstates/congress` repository. The goal is to gather only the title metadata, while that repository processes all metadata in the xml. 
- https://github.com/unitedstates/congress/blob/master/tasks/bill_info.py#L55
+The pipeline includes the following tasks:
 
-```python
- titles = make_node(root, "titles", None)
-    for title in bill['titles']:
-        n = make_node(titles, "title", title['title'])
-        n.set("type", title['type'])
-        if title['as']:
-            n.set("as", title['as'])
-        if title['is_for_portion']:
-            n.set("partial", "1")
+scraping-task-midnight-daily:: responsible for scraping bills.
+
+pipeline-task-everyday-4am:: runs the pipeline at 4:00 AM.
+
+TODO: describe in more detail what the scraper and pipeline tasks do.
+
+After deploying with `docker-compose`, the tasks can be triggered manually through the API. 
+
+Scraping is triggered with a GET request to http://localhost:8080/scraping/
+
+The pipeline can be manually triggered with a GET request to http://localhost:8080/pipeline/.
+
+## Development (Individual components) 
+
+### How to update recent BillStatus XML Files:
+
+Bill data is primarily collected by using [unitedstates/congress](https://github.com/acxz/congress/tree/python-package), which covers 2013 to the present.
+
+This project collects data from [the official congressional XML data on legislation](https://github.com/usgpo/bill-status), which covers the 113th Congress (2013) to the present.
+
+#### Setup and how to use unitedstates/congress
+- Setup
+
+    System dependencies on ubuntu
+    
+    ```bash
+    sudo apt-get install git python3-dev libxml2-dev libxslt1-dev libz-dev python3-pip python3-venv
+    ```
+
+    Python depencies
+    
+    It's recommended you use a `virtualenv` (virtual environment) for development. Finally, with your virtual environment activated, install the python packages, which will pull in the python dependencies automatically:
+
+    ```bash
+    pip install .
+    ```
+
+- How to use it for collecting data
+
+    The process using this tool has 2 parts. First, the XML data must be fetched from [Govinfo](https://www.govinfo.gov/). The script pulls the bill status XML and on subsequent runs only pulls new and changed files:
+
+    ```bash
+    usc-run govinfo --bulkdata=BILLSTATUS
+    ```
+
+    Then run the bills task to process any new and changed files:
+
+    ```bash
+    usc-run bills
+    ```
+
+    All above commands should be executed in the directory that is the parent of `data` directory.
+
+    It's recommended to do this two-step process no more than every 6 hours, as the data is not updated more frequently than that (and often really only once daily).
+
+    ---
+    **NOTE**
+
+    To get the bulk data of bill status before 2013, we can use the [ProPublica bulk downloads page](https://www.propublica.org/datastore/dataset/congressional-data-bulk-legislation-bills). 
+    
+    Data is provided in both JSON and XML formats.
+    
+    Bulk data from previous congresses can be downloaded by clicking the links below. Bulk data for congresses before and including the 112th was generated by the Sunlight Foundation. Data for congresses the 113th Congress and subsequent congresses was generated by ProPublica, using code from the [@UnitedStates GitHub organization](https://github.com/unitedstates).
+
+### Pipeline
+
+#### Install dependencies
+
+    ```bash
+    sudo apt update -y
+    sudo apt upgrade -y
+    sudo apt install gcc -y
+    apt-get intall python3.x python3.x-dev
+    pip install -r requirements.txt
+    ```
+
+#### Elasticsearch docker deployment
+
+```bash
+cd <project-root>/es-docker
+mkdir data1
+sudo chown -R 1000:1000 ./data1
+# run es service as a background
+sudo docker-compose up -d
+
+# down service
+sudo docker-compose down
 ```
-+
-4. Index the deduplicated titles in Elasticsearch, in a document that also includes the bill number and the list of title dicts above. The index can be searched by bill number and by title.
 
-NOTE: if this can be done cleanly in PostgresSQL with the ability to do full text search, that would be preferred.
+#### PostgreSQL deployment
 
-+
-5. Use the ES index to construct a search query in Python. The query will input a bill number (e.g. 117hr4350) and return a) a list of bills with the same title and b) a list of bills with the same titleNoYear. These lists should include the bill number and the matching title.
-
-For example, if the query is for bill number `117hr4350`, the result should be in the following form:
-
-```javascript
-titles: {
-"CLEAR Act of 2011": [--list of bills that have this title--],
-"Clear Law Enforcement for Criminal Alien Removal Act of 2011": [--list of bills that have this title--],
-"To provide for enhanced Federal, State, and local assistance in the enforcement of the immigration laws, to amend the Immigration and Nationality Act, to authorize appropriations to carry out the State Criminal Alien Assistance Program, and for other purposes.": [--list of bills that have this title--]
-},
-titlesNoYear: {
-"CLEAR Act": [--list of bills that have this title--],
-"Clear Law Enforcement for Criminal Alien Removal Act": [--list of bills that have this title--],
-"To provide for enhanced Federal, State, and local assistance in the enforcement of the immigration laws, to amend the Immigration and Nationality Act, to authorize appropriations to carry out the State Criminal Alien Assistance Program, and for other purposes.": [--list of bills that have this title--]
-}
-```
-+
-6. Create an API with FastAPI that accepts a bill number and returns the above result. This should extend the API at https://github.com/aih/billtitles-py. PR requests in that Repo can be used to integrate this functionality.
-
-The API may look like the following:
-
-/bills/titles/116hr2500 ::
-list of titles and titlesNoYear, in the form of the above dict
-
-/bills/titles?bills=['117hr21', '116hr2500'...] ::
-
-{
-117hr21: { titles: ..., titlesNoYear: ...},
-116hr2500: { titles: ..., titlesNoYear: ...}
-}
-
-/titles/[title]?fuzzy=True ::
-list of matching titles and titlesNoYear, in the form of the above dict
-
-
-It may also include a POST, to add new titles to the dataset:
-
-POST /bills/titles/116hr4350
-```
-{
-titles: [
-"CLEAR Act of 2011",
-"Clear Law Enforcement for Criminal Alien Removal Act of 2011",
-"To provide for enhanced Federal, State, and local assistance in the enforcement of the immigration laws, to amend the Immigration and Nationality Act, to authorize appropriations to carry out the State Criminal Alien Assistance Program, and for other purposes."
-titlesNoYear: [
-"CLEAR Act",
-"Clear Law Enforcement for Criminal Alien Removal Act",
-"To provide for enhanced Federal, State, and local assistance in the enforcement of the immigration laws, to amend the Immigration and Nationality Act, to authorize appropriations to carry out the State Criminal Alien Assistance Program, and for other purposes."
-]
+Deploy a PostgreSQL instance as a docker container. After that, set up project user in DB.
+```postgresql
+postgres=# create user btiadmin with encrypted password 'btiadmin';
+CREATE ROLE
+postgres=# grant all on database billtitle to btiadmin;
+GRANT
 ```
 
-7. Dockerize the scraping and storage of data, and add to a docker-compose with dockerhub.io/arihersh/billtitles (from https://github.com/aih/billtitles-py)
+#### Add Environment Variables
 
+Add system environment variables to the .bashrc file.
+
+```bash
+sudo nano ~/.bashrc
+```
+
+Add the following line in `.bashrc` file depending on Dev or Prod server
+```edit
+export ENVIRONMENT=DEV
+```
+
+After that:
+```bash
+source ~/.bashrc
+sudo systemctl daemon-reload
+```
+Edit `<project>/billtitleindex/billtitleindex/settings/.env`. Configure project secretkey, DB username and password.
+
+#### Run pipeline
+
+To store bill data and index them, run pipeline with following command.    
+
+```bash
+source <project virtualenv>/env/bin/activate
+cd <project_dir>/billtitleindex
+python manage.py runpipeline
+```
+
+### Run FastAPI API
+
+```bash
+uvicorn billtitleindex.wsgi:app --reload
+```
+
+#### Sample response
+
+We can use `request.rest` to check the sample response of API endpoints
+
+### Scheduling Tasks with RabbitMQ
+
+```bash
+# Install Erlang/OTP
+## Import Erlang GPG Key
+$ sudo apt update
+
+$ sudo apt install software-properties-common apt-transport-https
+
+$ wget -O- https://packages.erlang-solutions.com/ubuntu/erlang_solutions.asc | sudo apt-key add -
+
+## Add Erlang Repository to Ubuntu
+### ubuntu 22.04/20.04
+$ echo "deb https://packages.erlang-solutions.com/ubuntu focal contrib" | sudo tee /etc/apt/sources.list.d/erlang.list
+
+### ubuntu 18.04
+$ echo "deb https://packages.erlang-solutions.com/ubuntu bionic contrib" | sudo tee /etc/apt/sources.list.d/erlang.list
+
+## Install Erlang
+$ sudo apt update
+
+$ sudo apt install erlang
+
+$ sudo apt install curl wget gpg gnupg2 -y
+
+$ curl -s https://packagecloud.io/install/repositories/rabbitmq/rabbitmq-server/script.deb.sh | sudo bash
+
+$ sudo apt update -y
+
+$ sudo apt install rabbitmq-server -y
+
+$ systemctl status rabbitmq-server.service
+```
