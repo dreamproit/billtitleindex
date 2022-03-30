@@ -1,7 +1,9 @@
-from django_elasticsearch_dsl import Document, fields
+from btiapp.models import BillBasic
+from btiapp.models import BillStageTitle
+from btiapp.models import BillTitles
+from django_elasticsearch_dsl import Document
+from django_elasticsearch_dsl import fields
 from django_elasticsearch_dsl.registries import registry
-
-from btiapp.models import BillBasic, BillTitles, BillStageTitle
 
 
 @registry.register_document
@@ -55,7 +57,6 @@ class BillTitlesDocument(Document):
         related_models = [BillBasic]
 
     def get_instances_from_related(self, related_instance):
-
         if isinstance(related_instance, BillBasic):
             return related_instance.billtitles.all()
 
@@ -88,6 +89,5 @@ class BillStageTitleDocument(Document):
         related_models = [BillBasic]
 
     def get_instances_from_related(self, related_instance):
-
         if isinstance(related_instance, BillBasic):
             return related_instance.billstagetitle.all()

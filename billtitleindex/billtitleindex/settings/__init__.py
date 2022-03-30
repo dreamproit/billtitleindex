@@ -1,6 +1,6 @@
 import os
 
-if os.environ.get('ENVIRONMENT') == "DEV":
-    from .dev import *
+if os.environ.get("ENVIRONMENT") == "DEV":
+    from billtitleindex.settings.dev import *  # noqa
 else:
-    from .prod import *
+    from billtitleindex.settings.prod import *  # noqa
