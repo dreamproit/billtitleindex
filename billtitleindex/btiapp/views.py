@@ -1,70 +1,33 @@
+from typing import List
+from typing import Optional
 
-from typing import List, Optional
-from fastapi import FastAPI, Depends, Query
-from django.http import JsonResponse
-from elasticsearch_dsl import Q
-import subprocess
-
+from btiapp import deps
+from btiapp import models  # BillBasic, BillStageTitle
 from btiapp import utils
-from btiapp.models import BillBasic, BillStageTitle
 from btiapp.documents import BillStageTitleDocument
-from btiapp.schemas import BillMatchingTitlesResponse, BillTitlesResponse, BillsTitlesResponse
-from btiapp.tasks import scrape_bills
-from django.core.management import call_command
+from btiapp.schemas import BillMatchingTitlesResponse
+from btiapp.schemas import BillsTitlesResponse
+from btiapp.schemas import BillTitlesResponse
+from btiapp.schemas import ErrorResponse
+from elasticsearch_dsl import Q
+from fastapi import APIRouter
+from fastapi import Depends
+from starlette.responses import JSONResponse
 
-app = FastAPI()
+from billtitleindex.celery import app as celery_app
 
-
-def parse_list(bills: List[str] = Query(None)):
-    """ Parse request query with bill numbers
-    
-        accepts strings formatted as lists with square brackets
-        billnumbers can be in the format
-        ["117hr21","116hr2500"], ['117hr21','116hr2500'], [117hr21,116hr2500], [117hr21, 116hr2500], [117hr21] or 117hr21
-    """
-    def remove_prefix(text: str, prefix: str):
-        return text[text.startswith(prefix) and len(prefix):]
-
-    def remove_postfix(text: str, postfix: str):
-        if text.endswith(postfix):
-            text = text[:-len(postfix)]
-        return text
-
-    if bills is None:
-        return
-
-    # we already have a list, we can return
-    if len(bills) > 1:
-        return bills
-
-    # if we don't start with a "[" and end with "]" it's just a normal entry
-    flat_names = bills[0]
-    if not flat_names.startswith("[") and not flat_names.endswith("]"):
-        return bills
-
-    flat_names = remove_prefix(flat_names, "[")
-    flat_names = remove_postfix(flat_names, "]")
-
-    names_list = flat_names.split(",")
-    
-    # remove `"`
-    names_list = [remove_prefix(n.strip(), "\"") for n in names_list]
-    names_list = [remove_postfix(n.strip(), "\"") for n in names_list]
-    
-    # remove `'`
-    names_list = [remove_prefix(n.strip(), "'") for n in names_list]
-    names_list = [remove_postfix(n.strip(), "'") for n in names_list]
-
-    return names_list
+app_router = APIRouter()
 
 
 def get_bill_titles_by_billnumber(billnumber: str):
-    """ Get bill titles and titlesNoYear by billnumber
+    """Get bill titles and titlesNoYear by billnumber
 
     Returns:
         tuple
     """
-    df = BillStageTitleDocument.search().filter(Q("match", **{"bill_basic.bill_number": billnumber}))
+    df = BillStageTitleDocument.search().filter(
+        Q("match", **{"bill_basic.bill_number": billnumber})
+    )
     dfr = df.execute()
     hits_total = dfr.hits.total.value
     bst_data = df[:hits_total].to_queryset().distinct()
@@ -76,37 +39,48 @@ def get_bill_titles_by_billnumber(billnumber: str):
         tf_hits = tfr.hits.total.value
         tf_data = tf[:tf_hits].to_queryset().distinct()
         bills_containing_title = [title.bill_basic.bill_number for title in tf_data]
-        
-        tnyf = BillStageTitleDocument.search().filter(Q("match_phrase", titleNoYear=bst.titleNoYear))
+
+        tnyf = BillStageTitleDocument.search().filter(
+            Q("match_phrase", titleNoYear=bst.titleNoYear)
+        )
         tnyfr = tnyf.execute()
         tnyf_hits = tnyfr.hits.total.value
         tnyf_data = tnyf[:tnyf_hits].to_queryset().distinct()
-        bills_containing_titleNoYear = [titleNoYear.bill_basic.bill_number for titleNoYear in tnyf_data]
-        
+        bills_containing_titleNoYear = [
+            titleNoYear.bill_basic.bill_number for titleNoYear in tnyf_data
+        ]
+
         titles[bst.title] = bills_containing_title
         titlesNoYear[bst.titleNoYear] = bills_containing_titleNoYear
     return titles, titlesNoYear
 
 
 def get_bill_stage_titles_by_billnumber(billnumber: str):
-    """ Get bill stage titles by bill number
+    """Get bill stage titles by bill number
 
     Returns:
         tuple
     """
-    df = BillStageTitleDocument.search().filter(Q("match", **{"bill_basic.bill_number": billnumber}))
+    df = BillStageTitleDocument.search().filter(
+        Q("match", **{"bill_basic.bill_number": billnumber})
+    )
     dfr = df.execute()
     hits_total = dfr.hits.total.value
     bst_data = df[:hits_total].to_queryset().distinct()
     titles = [bst.title for bst in bst_data]
     titlesNoYear = [bst.titleNoYear for bst in bst_data]
-    return titles,titlesNoYear
-        
+    return titles, titlesNoYear
 
-@app.get(
+
+@app_router.get(
     "/bills/titles/{billnumber}",
-    response_model=BillTitlesResponse)
-def get_bill_titles_by_bill(billnumber: str):
+    summary="Retrieve titles and titlesNoYear information for a specific bill.",
+    tags=["bill-titles-by-bill"],
+    response_model=BillTitlesResponse,
+)
+def get_bill_titles_by_bill(
+    bill_titles_by_billnumber=Depends(get_bill_titles_by_billnumber),
+):
     """Get bill titles by bill number
 
     Args:
@@ -115,14 +89,21 @@ def get_bill_titles_by_bill(billnumber: str):
     Returns:
         BillTitlesResponse
     """
-    titles, titlesNoYear = get_bill_titles_by_billnumber(billnumber)
+    (
+        titles,
+        titlesNoYear,
+    ) = bill_titles_by_billnumber  # get_bill_titles_by_billnumber(billnumber)
     return BillTitlesResponse(titles=titles, titlesNoYear=titlesNoYear)
 
 
-@app.get(
-    "/bills/titles", 
-    response_model=BillsTitlesResponse)
-def get_bill_titles_by_bills(bills: List[str] = Depends(parse_list)):
+@app_router.get(
+    "/bills/titles",
+    summary="Retrieve titles and titlesNoYear information for the dedicated bills.",
+    tags=["bill-titles-by-bills"],
+    name="get-bill-titles-by-bills",
+    response_model=BillsTitlesResponse,
+)
+def get_bill_titles_by_bills(bills: List[str] = Depends(deps.parse_list)):
     """Get bill titles by billnumber list
 
     Args:
@@ -135,16 +116,25 @@ def get_bill_titles_by_bills(bills: List[str] = Depends(parse_list)):
     if bills:
         for bill in bills:
             titles, titlesNoYear = get_bill_titles_by_billnumber(bill)
-            bill_titles[bill] = BillTitlesResponse(titles=titles, titlesNoYear=titlesNoYear)
-        return BillsTitlesResponse(__root__=bill_titles)
+            bill_titles[bill] = dict(titles=titles, titlesNoYear=titlesNoYear)
+        return bill_titles
     else:
-        return JSONResponse({'Warn': 'Bill numbers list not provided.'}, status_code=400)
-        
+        return JSONResponse(
+            {"Warn": "Bill numbers list not provided."}, status_code=400
+        )
 
-@app.get(
-    "/titles/{title}", 
-    response_model=BillMatchingTitlesResponse)
-def get_matching_titles(title: str, fuzzy: Optional[bool] = True):
+
+@app_router.get(
+    "/titles/{title}",
+    summary=(
+        "Retrieve titles and titlesNoYear "
+        "information that matches to a specific title."
+    ),
+    tags=["get-matching-titles"],
+    name="get-matching-titles",
+    response_model=BillMatchingTitlesResponse,
+)
+def get_matching_titles(title: str, fuzzy: Optional[bool] = False, limit: int = 10):
     """Get matching titles
 
     Args:
@@ -154,25 +144,75 @@ def get_matching_titles(title: str, fuzzy: Optional[bool] = True):
     Returns:
         BillMatchingTitlesResponse or JSONResponse
     """
+    slop = len(title.split()) - 1
+
+    def build_match_q(field):
+        return Q(
+            "match",
+            **{
+                field: dict(
+                    query=title,
+                    fuzziness=4,
+                    boost=1,
+                )
+            },
+        )
+
+    def build_match_phrase_q(field):
+        return Q(
+            "match_phrase",
+            **{
+                field: dict(
+                    query=title,
+                    slop=slop,
+                    boost=20,
+                )
+            },
+        )
+
     if fuzzy:
-        df = BillStageTitleDocument.search().filter(
-            Q("match_phrase", title=title) | Q("match_phrase", titleNoYear=title))
-        dfr = df.execute()
-        hits_total = dfr.hits.total.value
-        bst_data = df[:hits_total].to_queryset().distinct()
-        titles=[]
-        titlesNoYear=[]
-        for bst in bst_data:
-            titles.append(bst.title)
-            titlesNoYear.append(bst.titleNoYear)
-        return BillMatchingTitlesResponse(titles=titles, titlesNoYear=titlesNoYear)
+        query = (build_match_q("title") | build_match_phrase_q("title")) | (
+            build_match_q("titleNoYear") | build_match_phrase_q("titleNoYear")
+        )
+        df = BillStageTitleDocument.search().query(query)
     else:
-        return JSONResponse({'Warn': 'Can not find fuzzy query parameter'}, status_code=400)
+        df = BillStageTitleDocument.search().filter(
+            Q("match_phrase", title=title) | Q("match_phrase", titleNoYear=title)
+        )
+    df = df.sort({"_score": "desc"})
+    dfr = df.execute()
+
+    hits_total = dfr.hits.total.value
+    bst_data = df[:limit].to_queryset().distinct()
+    titles = []
+    titlesNoYear = []
+    for bst in bst_data:
+        titles.append(bst.title)
+        titlesNoYear.append(bst.titleNoYear)
+    return BillMatchingTitlesResponse(
+        titles=titles,
+        titlesNoYear=titlesNoYear,
+        hitsTotal=hits_total,
+    )
 
 
-@app.post(
-    "/bill/titles/{billnumber}", 
-    response_model=BillMatchingTitlesResponse)
+@app_router.post(
+    "/bills/titles/{billnumber}",
+    summary="Add new title to a specific bill data.",
+    tags=["add-new-title-to-bill"],
+    response_model=BillMatchingTitlesResponse,
+    responses={
+        200: {
+            "model": BillMatchingTitlesResponse,
+            "description": "Item created",
+        },
+        404: {
+            "model": ErrorResponse,
+            "description": "Item was not found",
+        },
+    },
+    name="add-new-title-to-bill",
+)
 def add_new_title_to_bill(billnumber: str, title: str):
     """Add new title to a specific bill dataset
 
@@ -183,29 +223,32 @@ def add_new_title_to_bill(billnumber: str, title: str):
     Returns:
         BillMatchingTitlesResponse or JSONResponse
     """
-    bill_basic = BillBasic.objects.filter(bill_number=billnumber).first()
+    bill_basic = models.BillBasic.objects.filter(bill_number=billnumber).first()
     if bill_basic:
-        BillStageTitle.objects.get_or_create(bill_basic=bill_basic, title=title, titleNoYear=utils.get_titleNoYear(title))
-        titles, titlesNoYear = get_bill_stage_titles_by_billnumber(bill_basic.bill_number)
+        models.BillStageTitle.objects.get_or_create(
+            bill_basic=bill_basic,
+            title=title,
+            titleNoYear=utils.get_titleNoYear(title),
+        )
+        titles, titlesNoYear = get_bill_stage_titles_by_billnumber(
+            bill_basic.bill_number
+        )
         return BillMatchingTitlesResponse(titles=titles, titlesNoYear=titlesNoYear)
     else:
-        return JSONResponse({'Error': f'Can not find bill depending on this {billnumber}'}, status_code=404)
-    
+        return ErrorResponse(
+            {"error": f"Can not find bill depending on this {billnumber}"},
+        )
 
-def scrape(request):
-    if request.method == 'GET':
-        print('scraping....')
-        working_directory = '/app'
-        scraping_process = subprocess.Popen(['usc-run', 'govinfo', '--bulkdata=BILLSTATUS'], cwd=working_directory)
-        if not scraping_process.poll() is None:
-            # process has finished
-            converting_process = subprocess.Popen(['usc-run', 'bills'])
-        return JsonResponse({'result': 'success'}, status=200)
 
-    
-def run_pipeline(request):
-    if request.method == "GET":
-        print('runpipeline....')
-        call_command('runpipeline', verbosity=3)
-        return JsonResponse({'result': 'success'}, status=200)
-    
+@app_router.get("/scrape/", tags=["utils"], status_code=200)
+def run_celery_scrape():
+    """Run scrape process in background, using celery worker."""
+    celery_app.send_task("btiapp.tasks.scrape_bills")
+    return {"result": "running task scrape_bills"}
+
+
+@app_router.get("/pipeline/", tags=["utils"], status_code=200)
+def run_celery_pipeline():
+    """Run pipeline process in background, using celery worker."""
+    celery_app.send_task("btiapp.tasks.run_pipeline")
+    return {"result": "running task run_pipeline"}

@@ -1,0 +1,50 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.1.0
+    hooks:
+      - id: check-ast
+      - id: debug-statements
+
+  - repo: https://github.com/psf/black
+    rev: 22.3.0
+    hooks:
+      - id: black
+        args: [ --line-length=88 ]
+
+  - repo: https://github.com/PyCQA/autoflake
+    rev: v1.4
+    hooks:
+      - id: autoflake
+        args: [ --remove-unused-variables,   --remove-all-unused-imports, --in-place, -r ]
+
+  - repo: https://github.com/asottile/reorder_python_imports
+    rev: v3.0.1
+    hooks:
+      - id: reorder-python-imports
+
+#  - repo: https://github.com/MarcoGorelli/absolufy-imports
+#    rev: v0.3.1
+#    hooks:
+#      - id: absolufy-imports
+
+  - repo: https://github.com/PyCQA/flake8
+    rev: 4.0.1
+    hooks:
+      - id: flake8
+        args: [--ignore=E203, --exclude=billtitleindex/billtitleindex/settings/*.py]
+
+# - repo: https://github.com/asottile/dead
+#    rev: v1.4.0
+#    hooks:
+#      - id: dead
+
+  - repo: https://github.com/IamTheFij/docker-pre-commit
+    rev: v2.1.0
+    hooks:
+      - id: docker-compose-check
+
+  - repo: https://github.com/AleksaC/hadolint-py
+    rev: v2.9.3
+    hooks:
+      - id: hadolint
+        args: [ --ignore, DL3025, --ignore, DL3018 ]
