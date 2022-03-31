@@ -31,7 +31,7 @@ services:
 #      - main
     volumes:
       - ./elasticsearch/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
-      - ./data1:/var/log/data
+      - ../data1:/var/log/data
     restart: on-failure
 
   # RabbitMQ
@@ -63,6 +63,7 @@ services:
       - es01
     volumes:
       - .:/app
+      - ${LOCAL_DATA_DIR}:${DATA_DIR}/../
 #    networks:
 #      - main
     restart: on-failure
@@ -79,6 +80,7 @@ services:
       - rabbitmq
     volumes:
       - .:/app
+      - ${LOCAL_DATA_DIR}:${DATA_DIR}/../
     restart: on-failure
 
 #networks:

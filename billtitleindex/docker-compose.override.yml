@@ -45,6 +45,9 @@ services:
       context: .
       args:
         - DOCKER_DEFAULT_PLATFORM=linux/amd64
+    volumes:
+      - .:/app
+      - ${LOCAL_DATA_DIR}:${DATA_DIR}/../
 
 volumes:
   app-db-data:
