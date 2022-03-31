@@ -171,8 +171,12 @@ To configure the environment of containers there should be `.env` file.
 |admin:root
 
 |DATA_DIR
-|Mount point inside of the container where congress data is stored
+|Mount directory inside the container where congress data is stored
 |
+
+|LOCAL_DATA_DIR
+|Where is the bills data stored outside of the docker
+|../congress/
 
 |POSTGRES_HOST
 |Postgres server host name
