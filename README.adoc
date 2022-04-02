@@ -58,9 +58,38 @@ image::docs/img/pg_admin.png[width=640]
 
 ## Usage
 
-Schemas are well described in the <<swagger-schemas,swagger>>
+### API Usage
 
-`TODO:` Describe how to use the API and what responses to expect.
+Once the API is running, you can access it at port `8000` of the host (defined in the docker-compose).
+
+The API routes and schemas are described with <<swagger-schemas,swagger>>.
+
+## Deployment with docker-compose
+
+.If you already have loaded bills data - put loaded data into the project directory in the same folder where `docker-compose.yml` file is found.
+
+Run command
+```bash
+docker-compose up -d
+```
+
+This will start the docker containers, including both the scrapers for bill metadata and indexing of the titles and the FastAPI server.
+
+`NOTE:` If you don't have loaded congress bills data yet - you will need to trigger tasks through <<swagger-trigger-tasks,Swagger UI>> or running <<run-scrapers-pipeline,this>> command in terminal.
+
+### Docker compose usage
+There are 2 `docker-compose` config files:
+
+* `docker-compose.yml` - is the main configuration file for docker-compose command, which should be used for deployment on the prod server
+* `docker-compose.override.yml` - the main purpose of this file is to allow modifications inside the main `docker-compose.yml` file without actual changes inside  it. It allows to re-define services and theirs configuration for local development needs.
+
+
+.Be aware:
+* Docker compose automatically apply these files if it sees that `.override` file exists next to the main docker-compose file.
+
+* `docker-compose.override.yml` overrides path to `.env` file with `.env.local`. So for local development you can change any variable in `.env.local` file.
+
+* `docker-compose.override.yml` file should be removed when it's deploying on the prod - so docker compose will use `.env` file which can be created by copying and modifying `.env.local`.
 
 ### Development
 For local development you should install such tools:
@@ -119,33 +148,6 @@ Reorder python imports...................................................Passed
 ** https://github.com/asottile/reorder_python_imports[reorder-python-imports]
 
 `NOTE:` `pre-commit` tool will install all these tools automatically at first run. You don't need to install any of them.
-
-## Deployment
-
-.If you already have loaded bills data - put loaded data into the project directory in the same folder where `docker-compose.yml` file is
-
-Run command
-```bash
-docker-compose up -d
-```
-
-This will start the docker containers, including both the scrapers for bill metadata and indexing of the titles and the FastAPI server.
-
-`NOTE:` If you don't have loaded congress bills data yet - you will need to trigger tasks through <<swagger-trigger-tasks,Swagger UI>> or running <<run-scrapers-pipeline,this>> command in terminal.
-
-### Docker compose usage
-There are 2 `docker-compose` config files:
-
-* `docker-compose.yml` - is the main configuration file for docker-compose command, which should be used for deployment on the prod server
-* `docker-compose.override.yml` - the main purpose of this file is to allow modifications inside the main `docker-compose.yml` file without actual changes inside  it. It allows to re-define services and theirs configuration for local development needs.
-
-
-.Be aware:
-* Docker compose automatically apply these files if it sees that `.override` file exists next to the main docker-compose file.
-
-* `docker-compose.override.yml` overrides path to `.env` file with `.env.local`. So for local development you can change any variable in `.env.local` file.
-
-* `docker-compose.override.yml` file should be removed when it's deploying on the prod - so docker compose will use `.env` file which can be created by copying and modifying `.env.local`.
 
 ### Used containers and theirs purposes
 
