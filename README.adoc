@@ -3,6 +3,22 @@
 # BillTitleIndex 
 
 ## Overview
+
+The BillTitleIndex repository gathers metadata about the titles of the bills in the United States Congress. This information is collected, added to a PostgreSQL database, and then used to create a searchable index and API. This API is combined with an 
+API that identifies similar bills (aih/billtitles-py), and this combined API will be used by the BillMap project (/unitedstates/Bill
+Map) which provides context and associated documents for similar bills (e.g. companion bills, related bills, etc.).
+
+This repository provides a containerized environment that scrapes bill metadata from scratch; processes and stores data to PostgreSQL and Elasticsearch; and provides an API with FastAPI/Swagger/OpenAPI to search bill titles.
+
+The docker-compose orchestrates the following containers:
+    * PostgreSQL database
+    * Elasticsearch index
+    * Celery workers
+    * RabbitMQ message broker
+    * Flower server
+    * FastAPI API
+
+## Tools
 ### https://swagger.io[Swagger]
 Swagger is a tool to work with self-documented code.
 This is a great out of the box feature of FastAPI.
