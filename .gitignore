@@ -132,7 +132,8 @@ dmypy.json
 # custom
 .vscode
 data/
+data1/
 cache/
-congress/
+congress*
 es-docker/data1
 billtitleindex/data1

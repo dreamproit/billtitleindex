@@ -9,21 +9,24 @@ services:
     env_file:
       - .env.local
     depends_on:
-      - db
+      - postgres
     ports:
       - "5050:5050"
 
-#  flower:
-#    env_file:
-#      - .env.local
-#    environment:
-#      - MESSAGE_BROKER_URI=amqp://guest@queue:5672/
-#    ports:
-#      - "5555:5555"
-#    command:
-#      - "flower"
-#      - "--broker=amqp://guest@queue:5672/"
-#      - "--broker_api=http://guest:guest@queue:15672/api//"
+  flower:
+    image: mher/flower
+    env_file:
+      - .env.local
+    environment:
+      - MESSAGE_BROKER_URI=amqp://guest@queue:5672/
+    ports:
+      - "5555:5555"
+    command:
+      - "celery"
+#      - "-A billtitleindex"
+      - "--broker=amqp://guest@rabbitmq:5672/"
+      - "flower"
+      - "--broker-api=http://guest:guest@rabbitmq:15672/api//"
 
   # FastAPI
   api:
@@ -42,6 +45,9 @@ services:
       context: .
       args:
         - DOCKER_DEFAULT_PLATFORM=linux/amd64
+    volumes:
+      - .:/app
+      - ${LOCAL_DATA_DIR}:${DATA_DIR}/../
 
 volumes:
   app-db-data:

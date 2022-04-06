@@ -27,22 +27,26 @@ services:
     ports:
       - "9200:9200"
       - "9300:9300"
-    #    networks:
-    #      - main
+#    networks:
+#      - main
     volumes:
       - ./elasticsearch/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
-      - ./data1:/var/log/data
+      - ../data1:/var/log/data
     restart: on-failure
 
   # RabbitMQ
   rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "15672:15672"
+      - "15691:15691"
+      - "15692:15692"
+#      - 15672/tcp, 15691/tcp, 15692/tcp, 25672/tcp, 4369/tcp, 5671/tcp, 5672/tcp
+
     container_name: rabbitmq
     hostname: rabbitmq
-    image: rabbitmq:latest
-    ports:
-      - "5672:5672"
-    #    networks:
-    #      - main
+#    networks:
+#      - main
     restart: on-failure
 
   # FastAPI
@@ -59,8 +63,9 @@ services:
       - es01
     volumes:
       - .:/app
-    #    networks:
-    #      - main
+      - ${LOCAL_DATA_DIR}:${DATA_DIR}/../
+#    networks:
+#      - main
     restart: on-failure
 
   # celery worker
@@ -75,6 +80,7 @@ services:
       - rabbitmq
     volumes:
       - .:/app
+      - ${LOCAL_DATA_DIR}:${DATA_DIR}/../
     restart: on-failure
 
 #networks:
