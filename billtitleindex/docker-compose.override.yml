@@ -35,7 +35,8 @@ services:
       args:
         - DOCKER_DEFAULT_PLATFORM=linux/amd64
     command: /start-reload.sh
-    env_file: .env.local
+    env_file:
+      - .env.local
 
   # celery worker
   celery_worker:
