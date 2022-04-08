@@ -20,4 +20,5 @@ jobs:
         pip install pylint flake8
     - name: Analysing the code with pylint
       run: |
-        pylint $(git ls-files '*.py')
+        flake8 --ignore=E203, --exclude=billtitleindex/billtitleindex/settings/*.py
+        # pylint $(git ls-files '*.py')

@@ -1,3 +1,4 @@
+.idea
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -131,6 +132,7 @@ dmypy.json
 # custom
 .vscode
 data/
+data1/
 cache/
-congress/
-es-docker/data1
+congress*
+billtitleindex/data1

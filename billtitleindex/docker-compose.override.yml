@@ -1,0 +1,54 @@
+version: "3.3"
+services:
+
+  postgres:
+    env_file: .env.local
+
+  pgadmin:
+    image: dpage/pgadmin4
+    env_file:
+      - .env.local
+    depends_on:
+      - postgres
+    ports:
+      - "5050:5050"
+
+  flower:
+    image: mher/flower
+    env_file:
+      - .env.local
+    environment:
+      - MESSAGE_BROKER_URI=amqp://guest@queue:5672/
+    ports:
+      - "5555:5555"
+    command:
+      - "celery"
+#      - "-A billtitleindex"
+      - "--broker=amqp://guest@rabbitmq:5672/"
+      - "flower"
+      - "--broker-api=http://guest:guest@rabbitmq:15672/api//"
+
+  # FastAPI
+  api:
+    build:
+      context: .
+      args:
+        - DOCKER_DEFAULT_PLATFORM=linux/amd64
+    command: /start-reload.sh
+    env_file:
+      - .env.local
+
+  # celery worker
+  celery_worker:
+    env_file:
+      - .env.local
+    build:
+      context: .
+      args:
+        - DOCKER_DEFAULT_PLATFORM=linux/amd64
+    volumes:
+      - .:/app
+      - ${LOCAL_DATA_DIR}:${DATA_DIR}/../
+
+volumes:
+  app-db-data:

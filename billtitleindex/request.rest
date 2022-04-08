@@ -20,3 +20,9 @@ GET http://localhost:8000/api/bills/titles?bills=[117hr21]
 
 ### Case: Only one value without bracket
 GET http://localhost:8000/api/bills/titles?bills=117hr21
+
+### init scraping
+GET http://localhost:8080/scraping/
+
+### init pipeline
+GET http://localhost:8080/pipeline/
