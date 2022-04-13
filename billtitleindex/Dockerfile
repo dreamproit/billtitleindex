@@ -11,7 +11,7 @@ ENV PYTHONUNBUFFERED=1
 #RUN apt-get -y update && apt-get -y --no-install-recommends install gcc && apt-get clean \
 # && rm -rf /var/lib/apt/lists/*
 
-RUN mkdir -p /app
+RUN mkdir -p /app /app/congress/data/ /congress/data/
 WORKDIR /app
 COPY . .
 # Install pip requirements
