@@ -2,7 +2,7 @@
 
 eksPipeline{
     project = "billtitleindex-chart"
-    awsProjectMap = ["739065237548": "dev,stage,prod,preprod"]
+    awsProjectMap = ["739065237548": "dev,stage,prod,preprod,helm_chart"]
     awsClusterMap = ["739065237548": "eks-cluster-main"]
     deployMap = ["helm_chart": "dev", "stage": "stage", "prod": "prod"]
     artifactName = "billtitleindex"
