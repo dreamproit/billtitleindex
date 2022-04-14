@@ -1,10 +1,20 @@
 @Library('jenkins-shared-lib') _
 
 eksPipeline{
-    project = "billtitleindex"
+    project = "billtitleindex-chart"
     awsProjectMap = ["739065237548": "dev,stage,prod,preprod"]
     awsClusterMap = ["739065237548": "eks-cluster-main"]
     deployMap = ["dev": "dev", "stage": "stage", "prod": "prod", "preprod": "preprod"]
     artifactName = "billtitleindex"
     promotionMap = ["prod": ["from": "stage"], "preprod": ["from": "stage"]]
+    listCredentials = [
+        "SECRET_KEY",
+        "POSTGRES_HOST",
+        "POSTGRES_USER",
+        "POSTGRES_PASSWORD",
+        "POSTGRES_DB",
+        "POSTGRES_PORT",
+        "MESSAGE_BROKER_USER",
+        "MESSAGE_BROKER_PASSWORD"
+    ]
 }
