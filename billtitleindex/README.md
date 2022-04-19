@@ -127,3 +127,7 @@ uvicorn billtitleindex.wsgi:app --reload
 ### Sample response
 
 We can use `request.rest` to check the sample response of API endpoints
+
+## Deployment diagram
+
+![alt text](https://github.com/arachnidllc/billtitleindex/blob/helm_chart/billtitleindex/diagram.png?raw=true)
