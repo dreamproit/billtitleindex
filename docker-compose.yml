@@ -62,7 +62,7 @@ services:
       - postgres
       - es01
     volumes:
-      - .:/app
+      - ./src/billtitleindex:/app
       - ${LOCAL_DATA_DIR}:${DATA_DIR}/../
 #    networks:
 #      - main
@@ -79,7 +79,7 @@ services:
       - postgres
       - rabbitmq
     volumes:
-      - .:/app
+      - ./src/billtitleindex:/app
       - ${LOCAL_DATA_DIR}:${DATA_DIR}/../
     restart: on-failure
 

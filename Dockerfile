@@ -7,12 +7,20 @@ ENV PYTHONDONTWRITEBYTECODE=1
 # Turns off buffering for easier container logging
 ENV PYTHONUNBUFFERED=1
 
+ENV POETRY_NO_INTERACTION=1
+ENV POETRY_HOME=/opt/poetry
+RUN pip install --no-cache-dir poetry==1.1.13 && \
+    poetry config virtualenvs.create false && \
+    mkdir -p /app
+
 # install dependency.
 #RUN apt-get -y update && apt-get -y --no-install-recommends install gcc && apt-get clean \
 # && rm -rf /var/lib/apt/lists/*
 
-RUN mkdir -p /app
 WORKDIR /app
-COPY . .
+COPY ./src/ .
 # Install pip requirements
-RUN pip install --no-cache-dir -r requirements.txt
+COPY pyproject.toml poetry.lock ./
+
+RUN poetry install --no-root
+#RUN pip install --no-cache-dir -r requirements.txt
