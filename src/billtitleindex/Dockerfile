@@ -18,7 +18,7 @@ RUN pip install --no-cache-dir poetry==1.1.13 && \
 # && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
-COPY ./src/ .
+COPY . .
 # Install pip requirements
 COPY pyproject.toml poetry.lock ./
 
