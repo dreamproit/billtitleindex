@@ -7,8 +7,7 @@ eksPipeline{
     deployMap = ["develop": "dev", "stage": "stage", "prod": "prod"]
     artifactName = "billtitleindex"
     promotionMap = ["prod": ["from": "stage"], "preprod": ["from": "stage"]]
-    context = "src/billtitleindex"
-    dockerfilePath = "../../Dockerfile"
+    valuesTemplatePath = "src/billtitleindex/billtitleindex-chart/values.yaml"
     listCredentials = [
         "SECRET_KEY",
         "POSTGRES_HOST",
