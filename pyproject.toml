@@ -3,6 +3,7 @@ name = "billtitleindex"
 version = "0.1.0"
 description = ""
 authors = ["Ari"]
+packages = [{include = "billtitleindex", from = "src", format = "sdist"}]
 
 [tool.poetry.dependencies]
 python = "^3.8"
