@@ -18,9 +18,10 @@ RUN pip install --no-cache-dir poetry==1.1.13 && \
 # && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
-COPY ./src/ .
 # Install pip requirements
 COPY pyproject.toml poetry.lock ./
 
 RUN poetry install --no-root
+
+COPY ./src/billtitleindex/ .
 #RUN pip install --no-cache-dir -r requirements.txt
