@@ -2,9 +2,9 @@
 
 eksPipeline{
     project = "billtitleindex-chart"
-    awsProjectMap = ["739065237548": "develop,stage,prod,preprod"]
+    awsProjectMap = ["739065237548": "develop,stage,prod,preprod,helm_chart_fix"]
     awsClusterMap = ["739065237548": "eks-cluster-main"]
-    deployMap = ["develop": "dev", "stage": "stage", "prod": "prod"]
+    deployMap = ["helm_chart_fix": "dev", "stage": "stage", "prod": "prod"]
     artifactName = "billtitleindex"
     promotionMap = ["prod": ["from": "stage"], "preprod": ["from": "stage"]]
     valuesTemplatePath = "src/billtitleindex/billtitleindex-chart/values.yaml"
