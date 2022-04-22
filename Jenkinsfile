@@ -8,6 +8,7 @@ eksPipeline{
     artifactName = "billtitleindex"
     promotionMap = ["prod": ["from": "stage"], "preprod": ["from": "stage"]]
     context = "src/billtitleindex"
+    dockerfilePath = "../../Dockerfile"
     listCredentials = [
         "SECRET_KEY",
         "POSTGRES_HOST",
