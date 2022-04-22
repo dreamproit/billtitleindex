@@ -8,6 +8,7 @@ eksPipeline{
     artifactName = "billtitleindex"
     promotionMap = ["prod": ["from": "stage"], "preprod": ["from": "stage"]]
     valuesTemplatePath = "src/billtitleindex/billtitleindex-chart/values.yaml"
+    helmContext = "src/billtitleindex/billtitleindex-chart/"
     listCredentials = [
         "SECRET_KEY",
         "POSTGRES_HOST",
