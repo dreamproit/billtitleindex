@@ -20,7 +20,7 @@ RUN pip install --no-cache-dir poetry==1.1.13 && \
 WORKDIR /app
 COPY . .
 # Install pip requirements
-COPY pyproject.toml poetry.lock ./
+COPY ../../pyproject.toml ../../poetry.lock ./
 
 RUN poetry install --no-root
 #RUN pip install --no-cache-dir -r requirements.txt
