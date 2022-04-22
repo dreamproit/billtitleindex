@@ -130,8 +130,8 @@ We can use `request.rest` to check the sample response of API endpoints
 
 ## Deployment diagram
 
-![alt text](https://github.com/arachnidllc/billtitleindex/blob/helm_chart/billtitleindex/diagram.png?raw=true)
+![alt text](https://github.com/arachnidllc/billtitleindex/blob/develop/docs/img/deploy-diagram.png?raw=true)
 
 ## Deployment layers diagram
 
-![alt text](https://github.com/arachnidllc/billtitleindex/blob/helm_chart/billtitleindex/layers-diagram.png?raw=true)
+![alt text](https://github.com/arachnidllc/billtitleindex/develop/docs/img/layers-diagram.png?raw=true)

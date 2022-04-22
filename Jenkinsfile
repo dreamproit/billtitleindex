@@ -7,7 +7,7 @@ eksPipeline{
     deployMap = ["develop": "dev", "stage": "stage", "prod": "prod"]
     artifactName = "billtitleindex"
     promotionMap = ["prod": ["from": "stage"], "preprod": ["from": "stage"]]
-    context = "billtitleindex"
+    context = "src/billtitleindex"
     listCredentials = [
         "SECRET_KEY",
         "POSTGRES_HOST",

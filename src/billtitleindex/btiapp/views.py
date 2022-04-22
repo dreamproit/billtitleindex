@@ -1,6 +1,7 @@
 from typing import List
 from typing import Optional
 
+from billtitleindex.celery import app as celery_app
 from btiapp import deps
 from btiapp import models  # BillBasic, BillStageTitle
 from btiapp import utils
@@ -13,8 +14,6 @@ from elasticsearch_dsl import Q
 from fastapi import APIRouter
 from fastapi import Depends
 from starlette.responses import JSONResponse
-
-from billtitleindex.celery import app as celery_app
 
 app_router = APIRouter()
 

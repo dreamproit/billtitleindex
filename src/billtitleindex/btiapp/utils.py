@@ -152,7 +152,7 @@ def process_set(to_fetch, options):
     logging.warning("Skipped %s." % len(skips))
     logging.warning("Saved data for %s." % len(saved))
 
-    return saved + skips  # all of the OK's
+    return {"saved": saved, "skips": skips, "errors": errors}  # all of the OK's
 
 
 def split_bill_id(bill_id):
