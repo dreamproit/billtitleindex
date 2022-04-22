@@ -61,9 +61,4 @@ class Command(BaseCommand):
             limit = options.get("limit", None)
             if limit:
                 to_fetch = to_fetch[: int(limit)]
-
-<<<<<<< HEAD:billtitleindex/btiapp/management/commands/runpipeline.py
-        utils.process_set(to_fetch, options)
-=======
         return utils.process_set(to_fetch, options)
->>>>>>> origin/dev/migrate_to_poetry:src/billtitleindex/btiapp/management/commands/runpipeline.py
