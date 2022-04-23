@@ -66,23 +66,23 @@ The API routes and schemas are described with <<swagger-schemas,swagger>>.
 
 ## Deployment with docker-compose
 
-.If you already have loaded bills BULK data - put loaded data into the project directory in the same folder where `docker-compose.yml` file is found.
+.If you have already have downloaded the bulk bill data (see below), put the `data` directory  in the same folder where `docker-compose.yml` file is found.
 
-How to download data is described <<bulk-data-download, here>>.
-After downloading one archive you will have to unpack it and you will see such structure of folders and files: image:docs/img/img.png[]
+To download the data follow the instructions <<bulk-data-download, here>>.
+After downloading one archive you will have to unpack it and you will see the following structure of folders and files: image:docs/img/img.png[]
 
-Where the top folder is called `data`, which contains folder with digits name - which means congress number. Inside each congress you see folders [`hconres`, `hjres`, `hr` and others].
+The top folder is called `data`, and contains a folder (e.g. `117`) corresponding to the congress number. Inside each congress are folders for the document type [`hconres`, `hjres`, `hr` and others].
 
-If you want to provide more data (not for only one congress) you have to merge all downloaded data folders (`r'data/\d*'` - all root folders of each data unpacked archive) into one folder `data/`, so the folders structure should look like this:
+To combine data for many congresses, merge all downloaded data folders (`r'data/\d*'` - all root folders of each data unpacked archive) into one folder `data/`, so the folder structure should look like this:
 image:docs/img/img_1.png[]
 
-Run this command to process bills information:
+Run this command to process bill information:
 
 ```bash
 docker compose run api usc-run bills
 ```
 
-Now you can run loading data into the database (PostgreSQL and replicate data to ElasticSearch) <<pipe-line-configuration, as described here>>.
+Now you can load data into the database (PostgreSQL and replicate data to ElasticSearch) as described <<pipe-line-configuration, here>>.
 
 
 To start all services run this command:
@@ -92,7 +92,7 @@ docker-compose up -d
 
 This will start the docker containers, including both the scrapers for bill metadata and indexing of the titles and the FastAPI server.
 
-`NOTE:` If you don't have loaded congress bills data yet - you will need to trigger tasks through <<swagger-trigger-tasks,Swagger UI>> or running <<run-scrapers-pipeline,this>> command in terminal.
+`NOTE:` If you have not downloaded bill data - you will need to trigger tasks through <<swagger-trigger-tasks,Swagger UI>> or running <<run-scrapers-pipeline,this>> command in terminal. The first stage will take many hours to download the initial data.
 
 ### Docker compose usage
 There are 2 `docker-compose` config files:
@@ -102,14 +102,29 @@ There are 2 `docker-compose` config files:
 
 
 .Be aware:
-* Docker compose automatically apply these files if it sees that `.override` file exists next to the main docker-compose file.
+* Docker compose automatically applies these files if it sees that `.override` file exists next to the main docker-compose file.
 
-* `docker-compose.override.yml` overrides path to `.env` file with `.env.local`. So for local development you can change any variable in `.env.local` file.
+* `docker-compose.override.yml` overrides the path to the `.env` file with `.env.local`. So for local development you can change any variable in the `.env.local` file.
 
-* `docker-compose.override.yml` file should be removed when it's deploying on the prod - so docker compose will use `.env` file which can be created by copying and modifying `.env.local`.
+* `docker-compose.override.yml` file should be removed when it's deployed in production - so docker compose will use a `.env` file which can be created by copying and modifying `.env.local`.
 
 ### Development
-For local development you should install such tools:
+For local development, install the following tools:
+
+#### Poetry 
+
+See  https://python-poetry.org/docs/master/#installing-with-the-official-installer
+
+In a virtual environment (Python >= 3.7) run this command:
+
+```bash
+curl -sSL https://install.python-poetry.org | python -
+```
+
+#### Install the project dependencies 
+
+`poetry install`
+
 
 #### pre-commit
 
