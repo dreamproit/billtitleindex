@@ -21,8 +21,8 @@ The docker-compose orchestrates the following containers:
 ## Tools
 ### https://swagger.io[Swagger]
 Swagger is a tool to work with self-documented code.
-This is a great out of the box feature of FastAPI.
-It allows writing documentation directly in the code and shows it in the UI, testing API endpoints, describing request parameters and schemas for requests and responses.
+This is a great out-of-the-box feature of FastAPI.
+It allows writing documentation directly in the code which is displayed it in the UI; testing API endpoints; and describing request parameters and schemas for requests and responses.
 
 image::docs/img/swagger_api_endpoints.png[width=640]
 
@@ -32,7 +32,7 @@ image::docs/img/swagger_schemas.png[width=640]
 ### https://flower.readthedocs.io/en/latest/[Flower]
 Tool to control and monitor celery workers.
 
-Accessible by this url http://localhost:5555
+Accessible by at url http://localhost:5555
 
 ``NOTE:`` Default Login / Password: `admin/root`. Can be configured by `.env` file.
 
@@ -43,9 +43,9 @@ Tool to query Postgres Database, monitor DB state, etc.
 
 Accessible by this url http://localhost:5050
 
-``NOTE:`` Default Login / Password: `admin@localhost.com/root`. Can be configured by `.env` file.
+``NOTE:`` Default Login / Password: `admin@localhost.com/root`. Can be configured in an `.env` file.
 
-.Staring from the scratch you won't have added databases, so you can do it:
+.Starting from the scratch you won't have added databases, so you can do the following:
 * right click on `Servers` (top left corner)
 * Register -> Server
 
@@ -66,7 +66,7 @@ The API routes and schemas are described with <<swagger-schemas,swagger>>.
 
 ## Deployment with docker-compose
 
-.If you have already have downloaded the bulk bill data (see below), put the `data` directory  in the same folder where `docker-compose.yml` file is found.
+.If you have already downloaded the bulk bill data (see below), put the `data` directory in the same folder where `docker-compose.yml` file is found.
 
 To download the data follow the instructions <<bulk-data-download, here>>.
 After downloading one archive you will have to unpack it and you will see the following structure of folders and files: image:docs/img/img.png[]
@@ -130,18 +130,13 @@ curl -sSL https://install.python-poetry.org | python -
 
 Allows to set git pre-commit hooks. Read about this great tool https://pre-commit.com[here]
 
-To install it run one of provided commands:
+
+Before actual development starts, run this command in the root directory of the project. It will setup git hooks:
 ```bash
-pip install pre-commit
-# OR
-brew install pre-commit
+poetry run pre-commit install
 ```
 
-Before actual development started run this command in the root directory of the project. It will setup git hooks:
-```bash
-pre-commit install
-```
-
+TODO: Fix this to describe how to run pre-commit on all files when installed with poetry. 
 Now you can test that it works:
 
 ```bash
@@ -225,7 +220,7 @@ To configure the environment of containers there should be `.env` file.
 |
 
 |LOCAL_DATA_DIR
-|Where is the bills data stored outside of the docker
+|Where the bill data is stored outside of the docker container
 |../congress/
 
 |POSTGRES_HOST

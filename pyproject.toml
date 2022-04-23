@@ -82,6 +82,7 @@ zipp = "3.7.0"
 united-states-congress = {git="https://github.com/unitedstates/congress", branch="main"}
 
 [tool.poetry.dev-dependencies]
+pre-commit = "^2.18.1"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
