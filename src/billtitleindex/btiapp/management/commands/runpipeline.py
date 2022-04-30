@@ -61,5 +61,4 @@ class Command(BaseCommand):
             limit = options.get("limit", None)
             if limit:
                 to_fetch = to_fetch[: int(limit)]
-
         return utils.process_set(to_fetch, options)

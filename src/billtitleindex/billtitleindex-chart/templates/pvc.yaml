@@ -1,0 +1,23 @@
+{{- if .Values.celery_worker.persistence.enabled }}
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: {{ template "billtitleindex-chart.fullname" . }}
+  labels:
+    app: {{ template "billtitleindex-chart.fullname" . }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: "{{ .Release.Name }}"
+    heritage: "{{ .Release.Service }}"
+  annotations:
+  {{- if .Values.celery_worker.persistence.storageClass }}
+    volume.beta.kubernetes.io/storage-class: {{ .Values.celery_worker.persistence.storageClass | quote }}
+  {{- else }}
+    volume.alpha.kubernetes.io/storage-class: default
+  {{- end }}
+spec:
+  accessModes:
+    - {{ .Values.celery_worker.persistence.accessMode | quote }}
+  resources:
+    requests:
+      storage: {{ .Values.celery_worker.persistence.size | quote }}
+{{- end }}

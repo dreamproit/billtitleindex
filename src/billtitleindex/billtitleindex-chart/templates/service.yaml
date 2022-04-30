@@ -1,0 +1,24 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "billtitleindex-chart.fullname" . }}
+  labels:
+    {{- include "billtitleindex-chart.labels" . | nindent 4 }}
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-backend-protocol: http
+    service.beta.kubernetes.io/aws-load-balancer-ssl-cert: arn:aws:acm:us-east-1:739065237548:certificate/16b7cb04-6e1e-4428-bd3f-c0e8284b4b32
+    service.beta.kubernetes.io/aws-load-balancer-ssl-ports: "https"
+    kubernetes.io/ingress.class: alb
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: http
+      protocol: TCP
+      name: http
+    - port: 5555
+      targetPort: 5555
+      protocol: TCP
+      name: flower-5555
+  selector:
+    {{- include "billtitleindex-chart.selectorLabels" . | nindent 4 }}
