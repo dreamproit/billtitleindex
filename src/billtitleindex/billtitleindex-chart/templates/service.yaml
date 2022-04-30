@@ -4,6 +4,8 @@ metadata:
   name: {{ include "billtitleindex-chart.fullname" . }}
   labels:
     {{- include "billtitleindex-chart.labels" . | nindent 4 }}
+  annotations:
+    {{- include "billtitleindex-chart.annotations" . | nindent 4 }}
 spec:
   type: {{ .Values.service.type }}
   ports:
