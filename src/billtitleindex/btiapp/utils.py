@@ -8,10 +8,11 @@ import traceback
 from datetime import datetime
 
 import ciso8601
-from btiapp.models import BillBasic
-from btiapp.models import BillStageTitle
-from btiapp.models import BillTitles
 from decouple import config
+
+from billtitleindex.btiapp.models import BillBasic
+from billtitleindex.btiapp.models import BillStageTitle
+from billtitleindex.btiapp.models import BillTitles
 
 
 def get_config():
@@ -98,7 +99,7 @@ def get_json_bills_to_process(options):
             ]
 
             for bill_type_and_number in sorted(
-                bills, key=lambda x: int(x.replace(bill_type, ""))
+                    bills, key=lambda x: int(x.replace(bill_type, ""))
             ):
                 dp = get_data_path(
                     congress, bill_type, bill_type_and_number, "data.json"
@@ -221,7 +222,7 @@ def process_data_json(bill_id, options):
 
     for title_item in bill_data["titles"]:
         if not BillStageTitle.objects.filter(
-            bill_basic__id=bill_basic.pk, title=title_item.get("title")
+                bill_basic__id=bill_basic.pk, title=title_item.get("title")
         ).exists():
             BillStageTitle.objects.get_or_create(
                 bill_basic=bill_basic,

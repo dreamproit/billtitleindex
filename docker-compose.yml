@@ -8,7 +8,7 @@ services:
     image: postgres:latest
     env_file: .env
     ports:
-      - "5432:5432"
+      - "5435:5432"
     #    networks:
     #      - main
     volumes:
@@ -62,7 +62,7 @@ services:
       - postgres
       - es01
     volumes:
-      - ./src/billtitleindex:/app
+      - ./src:/app
       - ${LOCAL_DATA_DIR}:${DATA_DIR}/../
 #    networks:
 #      - main
@@ -74,12 +74,12 @@ services:
     env_file:
       - .env
     build: .
-    command: sh -c "celery -A billtitleindex worker -l info -E -B"
+    command: sh -c "celery -A billtitleindex.billtitleindex worker -l info -E -B"
     depends_on:
       - postgres
       - rabbitmq
     volumes:
-      - ./src/billtitleindex:/app
+      - ./src:/app
       - ${LOCAL_DATA_DIR}:${DATA_DIR}/../
     restart: on-failure
 

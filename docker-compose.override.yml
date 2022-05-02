@@ -4,6 +4,12 @@ services:
   postgres:
     env_file: .env.local
 
+    deploy:
+      resources:
+        limits:
+          cpus: '3.0'
+#          memory: 50M
+
   pgadmin:
     image: dpage/pgadmin4
     env_file:
@@ -47,7 +53,7 @@ services:
       args:
         - DOCKER_DEFAULT_PLATFORM=linux/amd64
     volumes:
-      - .:/app
+      - ./src:/app
       - ${LOCAL_DATA_DIR}:${DATA_DIR}/../
 
 volumes:

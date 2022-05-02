@@ -1,9 +1,10 @@
-from btiapp.models import BillBasic
-from btiapp.models import BillStageTitle
-from btiapp.models import BillTitles
 from django_elasticsearch_dsl import Document
 from django_elasticsearch_dsl import fields
 from django_elasticsearch_dsl.registries import registry
+
+from billtitleindex.btiapp.models import BillBasic
+from billtitleindex.btiapp.models import BillStageTitle
+from billtitleindex.btiapp.models import BillTitles
 
 
 @registry.register_document

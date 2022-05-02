@@ -1,7 +1,7 @@
 import logging
 import sys
 
-from btiapp import utils
+from billtitleindex.btiapp import utils
 from django.core.management.base import BaseCommand
 
 

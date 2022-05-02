@@ -5,10 +5,11 @@ from __future__ import unicode_literals
 import os
 import subprocess
 
-from billtitleindex.celery import app
-from btiapp import utils
 from celery.utils.log import get_task_logger
 from django.core.management import call_command
+
+from billtitleindex.billtitleindex.celery import app
+from billtitleindex.btiapp import utils
 
 # logging
 logger = get_task_logger(__name__)

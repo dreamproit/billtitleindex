@@ -2,8 +2,8 @@
 name = "billtitleindex"
 version = "0.1.0"
 description = ""
-authors = ["Ari"]
-packages = [{include = "billtitleindex", from = "src", format = "sdist"}]
+authors = ["Alexander Boiko <django.develop@gmail.com>"]
+packages = [{include = "billtitleindex", from = "src"}]
 
 [tool.poetry.dependencies]
 python = "^3.8"
@@ -30,7 +30,7 @@ click-plugins = "1.1.1"
 click-repl = "0.2.0"
 cssselect = "1.1.0"
 databases = "0.5.5"
-Django = "3.2.12"
+Django = "^4.0"
 django-elasticsearch-dsl = "7.2.2"
 elasticsearch = "7.17.0"
 elasticsearch-dsl = "7.4.0"
@@ -80,13 +80,15 @@ xmltodict = "0.12.0"
 yarl = "1.7.2"
 zipp = "3.7.0"
 united-states-congress = {git="https://github.com/unitedstates/congress", branch="main"}
+setuptools = "^62.1.0"
 
 [tool.poetry.dev-dependencies]
 pre-commit = "^2.18.1"
 
 [build-system]
-requires = ["poetry-core>=1.0.0"]
+requires = ["setuptools", "poetry_core>=1.0"]
 build-backend = "poetry.core.masonry.api"
+
 
 [tool.black]
 line-length = 88

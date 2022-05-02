@@ -8,14 +8,15 @@ https://docs.djangoproject.com/en/3.2/howto/deployment/wsgi/
 """
 import os
 
-from django.core.wsgi import get_wsgi_application
+import django
 from fastapi import FastAPI
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "billtitleindex.settings")
+# path to settings.py is defined in .env file
+# os.environ.setdefault("DJANGO_SETTINGS_MODULE", "billtitleindex.billtitleindex.settings")
+django.setup()
 
-application = get_wsgi_application()
 
-from btiapp import views  # noqa
+from billtitleindex.btiapp.endpoints import titles, utils  # noqa
 
 app = FastAPI(
     title="BillTitleIndexAPI",
@@ -23,4 +24,5 @@ app = FastAPI(
     version="v1.0",
 )
 
-app.include_router(views.app_router, prefix="/api")
+app.include_router(titles.router, prefix="/api")
+app.include_router(utils.router, prefix="/api")

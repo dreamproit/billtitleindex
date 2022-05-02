@@ -26,10 +26,11 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "django.contrib.postgres",
     # es dsl
     "django_elasticsearch_dsl",
     # custom app
-    "btiapp",
+    "billtitleindex.btiapp",
 ]
 
 MIDDLEWARE = [
@@ -42,7 +43,7 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-ROOT_URLCONF = "billtitleindex.urls"
+ROOT_URLCONF = "billtitleindex.billtitleindex.urls"
 
 TEMPLATES = [
     {
@@ -60,7 +61,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = "billtitleindex.wsgi.application"
+# WSGI_APPLICATION = "billtitleindex.wsgi.application"
 
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators

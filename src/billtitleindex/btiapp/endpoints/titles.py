@@ -1,21 +1,24 @@
+from collections import defaultdict
+from itertools import groupby
 from typing import List
 from typing import Optional
 
-from billtitleindex.celery import app as celery_app
-from btiapp import deps
-from btiapp import models  # BillBasic, BillStageTitle
-from btiapp import utils
-from btiapp.documents import BillStageTitleDocument
-from btiapp.schemas import BillMatchingTitlesResponse
-from btiapp.schemas import BillsTitlesResponse
-from btiapp.schemas import BillTitlesResponse
-from btiapp.schemas import ErrorResponse
 from elasticsearch_dsl import Q
 from fastapi import APIRouter
 from fastapi import Depends
 from starlette.responses import JSONResponse
 
-app_router = APIRouter()
+from billtitleindex.btiapp import deps
+from billtitleindex.btiapp import models
+from billtitleindex.btiapp import utils
+from billtitleindex.btiapp.documents import BillStageTitleDocument
+from billtitleindex.btiapp.models import BillStageTitle
+from billtitleindex.btiapp.schemas import BillMatchingTitlesResponse
+from billtitleindex.btiapp.schemas import BillTitlesResponse
+from billtitleindex.btiapp.schemas import BillsTitlesResponse
+from billtitleindex.btiapp.schemas import ErrorResponse
+
+router = APIRouter()
 
 
 def get_bill_titles_by_billnumber(billnumber: str):
@@ -71,7 +74,7 @@ def get_bill_stage_titles_by_billnumber(billnumber: str):
     return titles, titlesNoYear
 
 
-@app_router.get(
+@router.get(
     "/bills/titles/{billnumber}",
     summary="Retrieve titles and titlesNoYear information for a specific bill.",
     tags=["bill-titles-by-bill"],
@@ -95,7 +98,7 @@ def get_bill_titles_by_bill(
     return BillTitlesResponse(titles=titles, titlesNoYear=titlesNoYear)
 
 
-@app_router.get(
+@router.get(
     "/bills/titles",
     summary="Retrieve titles and titlesNoYear information for the dedicated bills.",
     tags=["bill-titles-by-bills"],
@@ -123,7 +126,7 @@ def get_bill_titles_by_bills(bills: List[str] = Depends(deps.parse_list)):
         )
 
 
-@app_router.get(
+@router.get(
     "/titles/{title}",
     summary=(
         "Retrieve titles and titlesNoYear "
@@ -182,20 +185,32 @@ def get_matching_titles(title: str, fuzzy: Optional[bool] = False, limit: int = 
     dfr = df.execute()
 
     hits_total = dfr.hits.total.value
-    bst_data = df[:limit].to_queryset().distinct()
-    titles = []
-    titlesNoYear = []
-    for bst in bst_data:
-        titles.append(bst.title)
-        titlesNoYear.append(bst.titleNoYear)
-    return BillMatchingTitlesResponse(
-        titles=titles,
-        titlesNoYear=titlesNoYear,
+    bst_data = (
+        df[:limit]
+        .to_queryset()
+        .values_list(
+            "title",
+            "titleNoYear",
+            "bill_basic__bill_number",
+        )
+        .distinct()
+    )
+    titles = defaultdict(list)
+    titles_no_year = defaultdict(list)
+    for title, titleNoYear, bill_number in bst_data:
+        titles[title].append(bill_number)
+        titles_no_year[titleNoYear].append(bill_number)
+
+    return dict(
+        titles=[{"title": title, "bills": bills} for title, bills in titles.items()],
+        titlesNoYear=[
+            {"title": title, "bills": bills} for title, bills in titles_no_year.items()
+        ],
         hitsTotal=hits_total,
     )
 
 
-@app_router.post(
+@router.post(
     "/bills/titles/{billnumber}",
     summary="Add new title to a specific bill data.",
     tags=["add-new-title-to-bill"],
@@ -237,17 +252,3 @@ def add_new_title_to_bill(billnumber: str, title: str):
         return ErrorResponse(
             {"error": f"Can not find bill depending on this {billnumber}"},
         )
-
-
-@app_router.get("/scrape/", tags=["utils"], status_code=200)
-def run_celery_scrape():
-    """Run scrape process in background, using celery worker."""
-    celery_app.send_task("btiapp.tasks.scrape_bills")
-    return {"result": "running task scrape_bills"}
-
-
-@app_router.get("/pipeline/", tags=["utils"], status_code=200)
-def run_celery_pipeline():
-    """Run pipeline process in background, using celery worker."""
-    celery_app.send_task("btiapp.tasks.run_pipeline")
-    return {"result": "running task run_pipeline"}

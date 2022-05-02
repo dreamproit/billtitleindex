@@ -23,5 +23,5 @@ COPY pyproject.toml poetry.lock ./
 
 RUN poetry install --no-root
 
-COPY ./src/billtitleindex/ .
+COPY src/billtitleindex/ .
 #RUN pip install --no-cache-dir -r requirements.txt

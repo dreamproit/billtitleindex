@@ -21,13 +21,22 @@ class BillsTitlesResponse(BaseModel):
     __root__: Dict[str, BillTitlesResponse]
 
 
+class TitleMatchWithBill(BaseModel):
+    """
+    TitleMatchWithBill
+    """
+
+    bills: List[str]
+    title: str
+
+
 class BillMatchingTitlesResponse(BaseModel):
     """
     BillMatchingTitlesResponse
     """
 
-    titles: List[str]
-    titlesNoYear: List[str]
+    titles: List[TitleMatchWithBill]
+    titlesNoYear: List[TitleMatchWithBill]  # List[str]
     hitsTotal: int
 
 

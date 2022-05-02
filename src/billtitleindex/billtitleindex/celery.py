@@ -5,9 +5,9 @@ import os
 from celery import Celery
 from celery.schedules import crontab
 
-# from btiapp import tasks
-
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "billtitleindex.settings")
+os.environ.setdefault(
+    "DJANGO_SETTINGS_MODULE", "billtitleindex.billtitleindex.settings"
+)
 
 app = Celery("billtitleindex")
 
@@ -19,11 +19,11 @@ app.autodiscover_tasks()
 
 app.conf.beat_schedule = {
     "scraping-task-midnight-daily": {
-        "task": "btiapp.tasks.scrape_bills",
+        "task": "billtitleindex.btiapp.tasks.scrape_bills",
         "schedule": crontab(hour=0, minute=0),
     },
     "pipeline-task-everyday-4am": {
-        "task": "btiapp.tasks.run_pipeline",
+        "task": "billtitleindex.btiapp.tasks.run_pipeline",
         "schedule": crontab(hour=4, minute=0),
     },
 }
