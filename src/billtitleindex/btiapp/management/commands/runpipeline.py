@@ -47,6 +47,9 @@ class Command(BaseCommand):
 
         bill_id = options.get("bill_id", None)
         if bill_id:
+            print("bill_id: {}".format(bill_id))
+            to_fetch = bill_id
+        elif isinstance(bill_id, str):
             to_fetch = bill_id.split(",")
         else:
             to_fetch = utils.get_json_bills_to_process(options)
@@ -59,4 +62,4 @@ class Command(BaseCommand):
             if limit:
                 to_fetch = to_fetch[: int(limit)]
 
-        utils.process_set(to_fetch, options)
+        return utils.process_set(to_fetch, options)
